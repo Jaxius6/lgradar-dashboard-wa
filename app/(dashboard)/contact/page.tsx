@@ -35,18 +35,29 @@ export default function ContactPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
+        mode: 'cors',
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
           subject: formData.subject,
           message: formData.message,
           timestamp: new Date().toISOString(),
+          source: 'LG Radar Dashboard'
         }),
       });
 
-      if (response.ok) {
+      // Check if response is ok or if it's a successful webhook (some webhooks return different status codes)
+      if (response.ok || response.status === 200 || response.status === 201 || response.status === 204) {
         setIsSubmitted(true);
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: '',
+        });
         // Trigger confetti animation
         if (typeof window !== 'undefined' && (window as any).confetti) {
           (window as any).confetti({
@@ -56,11 +67,14 @@ export default function ContactPage() {
           });
         }
       } else {
-        throw new Error('Failed to send message');
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to send message: ${response.status} - ${errorText}`);
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Failed to send message. Please try again.');
+      // More user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to send message. Please try again or contact us directly at lgradarwa@gmail.com.au\n\nError: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
@@ -150,11 +164,7 @@ export default function ContactPage() {
                 <Badge variant="outline">9:00 AM - 5:00 PM</Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">Saturday</span>
-                <Badge variant="secondary">Closed</Badge>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Sunday</span>
+                <span className="text-sm">Saturday - Sunday</span>
                 <Badge variant="secondary">Closed</Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
