@@ -3,15 +3,23 @@ import { createBrowserClient, createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 // Client-side Supabase client
-export const createClientComponentClient = () =>
-  createBrowserClient(supabaseUrl, supabaseAnonKey);
+export const createClientComponentClient = () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+  return createBrowserClient(supabaseUrl, supabaseAnonKey);
+};
 
 // Server-side Supabase client for Server Components
 export const createServerComponentClient = () => {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+  
   const cookieStore = cookies();
   
   return createServerClient(supabaseUrl, supabaseAnonKey, {

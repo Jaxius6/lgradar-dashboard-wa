@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { Suspense } from 'react';
 import { GazettesTable } from '@/components/gazettes/gazettes-table';
 import { GazettesHeader } from '@/components/gazettes/gazettes-header';
