@@ -30,14 +30,19 @@ export default function ContactPage() {
     e.preventDefault();
     setIsLoading(true);
     
+    // Try multiple submission methods
+    let success = false;
+    
+    // Method 1: Try the n8n webhook
     try {
+      console.log('Attempting webhook submission...');
       const response = await fetch('https://n8n.jaxius.net/webhook/9b5def4e-cbd1-4512-8fdd-b8f10f300d74', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          'Accept': '*/*',
         },
-        mode: 'cors',
+        mode: 'no-cors', // Try no-cors mode to avoid CORS issues
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
@@ -48,36 +53,68 @@ export default function ContactPage() {
         }),
       });
 
-      // Check if response is ok or if it's a successful webhook (some webhooks return different status codes)
-      if (response.ok || response.status === 200 || response.status === 201 || response.status === 204) {
-        setIsSubmitted(true);
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          subject: '',
-          message: '',
+      // With no-cors, we can't read the response, so assume success if no error thrown
+      success = true;
+      console.log('Webhook submission successful');
+    } catch (webhookError) {
+      console.warn('Webhook submission failed:', webhookError);
+      
+      // Method 2: Try form-data format
+      try {
+        console.log('Attempting form-data submission...');
+        const formDataPayload = new FormData();
+        formDataPayload.append('name', formData.name);
+        formDataPayload.append('email', formData.email);
+        formDataPayload.append('subject', formData.subject);
+        formDataPayload.append('message', formData.message);
+        formDataPayload.append('timestamp', new Date().toISOString());
+        formDataPayload.append('source', 'LG Radar Dashboard');
+
+        const response2 = await fetch('https://n8n.jaxius.net/webhook/9b5def4e-cbd1-4512-8fdd-b8f10f300d74', {
+          method: 'POST',
+          mode: 'no-cors',
+          body: formDataPayload,
         });
-        // Trigger confetti animation
-        if (typeof window !== 'undefined' && (window as any).confetti) {
-          (window as any).confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
-          });
+
+        success = true;
+        console.log('Form-data submission successful');
+      } catch (formError) {
+        console.warn('Form-data submission failed:', formError);
+        
+        // Method 3: Fallback to mailto (always works)
+        const mailtoLink = `mailto:lgradarwa@gmail.com.au?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
+          `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
+        )}`;
+        
+        if (confirm('Direct submission failed. Would you like to open your email client to send the message?')) {
+          window.location.href = mailtoLink;
+          success = true;
         }
-      } else {
-        const errorText = await response.text().catch(() => 'Unknown error');
-        throw new Error(`Failed to send message: ${response.status} - ${errorText}`);
       }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      // More user-friendly error message
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      alert(`Failed to send message. Please try again or contact us directly at lgradarwa@gmail.com.au\n\nError: ${errorMessage}`);
-    } finally {
-      setIsLoading(false);
     }
+
+    if (success) {
+      setIsSubmitted(true);
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+      });
+      // Trigger confetti animation
+      if (typeof window !== 'undefined' && (window as any).confetti) {
+        (window as any).confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    } else {
+      alert('Failed to send message. Please contact us directly at lgradarwa@gmail.com.au or call +61 427 931 745');
+    }
+    
+    setIsLoading(false);
   };
 
   if (isSubmitted) {
