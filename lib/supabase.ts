@@ -9,6 +9,10 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 // Client-side Supabase client
 export const createClientComponentClient = () => {
   if (!supabaseUrl || !supabaseAnonKey) {
+    // During build time, return a mock client to prevent errors
+    if (typeof window === 'undefined') {
+      return null as any;
+    }
     throw new Error('Missing Supabase environment variables');
   }
   return createBrowserClient(supabaseUrl, supabaseAnonKey);
@@ -17,7 +21,8 @@ export const createClientComponentClient = () => {
 // Server-side Supabase client for Server Components
 export const createServerComponentClient = () => {
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables');
+    // During build time, return a mock client to prevent errors
+    return null as any;
   }
   
   const cookieStore = cookies();

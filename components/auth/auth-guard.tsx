@@ -30,7 +30,7 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
     getUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event: string, session: any) => {
         if (event === 'SIGNED_OUT' || !session) {
           router.push('/login');
         } else if (event === 'SIGNED_IN') {

@@ -15,28 +15,38 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClientComponentClient();
+  const [supabase, setSupabase] = useState<any>(null);
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
-    };
-
-    getUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
+    // Initialize Supabase client only on the client side
+    if (typeof window !== 'undefined') {
+      const client = createClientComponentClient();
+      setSupabase(client);
+      
+      const getUser = async () => {
+        if (!client) return;
+        const { data: { user } } = await client.auth.getUser();
+        setUser(user);
         setLoading(false);
-      }
-    );
+      };
 
-    return () => subscription.unsubscribe();
-  }, [supabase.auth]);
+      getUser();
+
+      const { data: { subscription } } = client.auth.onAuthStateChange(
+        (event: string, session: any) => {
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
+      );
+
+      return () => subscription.unsubscribe();
+    } else {
+      setLoading(false);
+    }
+  }, []);
 
   const signOut = async () => {
+    if (!supabase) return;
     await supabase.auth.signOut();
     setUser(null);
   };

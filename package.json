@@ -38,7 +38,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@stripe/stripe-js": "^2.4.0",
-    "@supabase/ssr": "^0.1.0",
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.39.3",
     "@tanstack/react-table": "^8.11.6",
     "class-variance-authority": "^0.7.0",

@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -20,10 +20,19 @@ export default function LoginPage() {
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client only on the client side
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSupabase(createClientComponentClient());
+    }
+  }, []);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!supabase) return;
+    
     setIsLoading(true);
     setError('');
 
@@ -50,6 +59,8 @@ export default function LoginPage() {
       setError('Please enter your email address');
       return;
     }
+    
+    if (!supabase) return;
 
     setIsLoading(true);
     setError('');
