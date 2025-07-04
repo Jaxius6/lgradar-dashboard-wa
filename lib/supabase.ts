@@ -44,17 +44,25 @@ export const createServerComponentClient = () => {
 };
 
 // Server-side Supabase client for Route Handlers
-export const createRouteHandlerClient = (request: NextRequest) => {
+export const createRouteHandlerClient = (request: NextRequest, response?: NextResponse) => {
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get(name: string) {
         return request.cookies.get(name)?.value;
       },
       set(name: string, value: string, options: any) {
-        request.cookies.set({ name, value, ...options });
+        if (response) {
+          response.cookies.set({ name, value, ...options });
+        } else {
+          request.cookies.set({ name, value, ...options });
+        }
       },
       remove(name: string, options: any) {
-        request.cookies.set({ name, value: '', ...options });
+        if (response) {
+          response.cookies.set({ name, value: '', ...options });
+        } else {
+          request.cookies.set({ name, value: '', ...options });
+        }
       },
     },
   });

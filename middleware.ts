@@ -15,12 +15,14 @@ export async function middleware(request: NextRequest) {
 
     const { supabase, response } = createMiddlewareClient(request);
 
-    // Refresh session if expired - required for Server Components
-    await supabase.auth.getSession();
+    // Skip middleware for auth callback to prevent redirect loops
+    if (request.nextUrl.pathname === '/auth/callback') {
+      return NextResponse.next();
+    }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // Refresh session if expired - required for Server Components
+    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
 
     // Protected routes that require authentication
     const protectedPaths = ['/gazettes', '/alerts', '/logs', '/billing', '/contact', '/settings'];
@@ -34,11 +36,27 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith(path)
     );
 
-    // Redirect to login if accessing protected route without authentication
-    if (isProtectedPath && !user) {
-      const redirectUrl = new URL('/login', request.url);
-      redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname);
-      return NextResponse.redirect(redirectUrl);
+    // For protected paths, check if we have a valid session
+    if (isProtectedPath) {
+      // If no user but we have a session, try to refresh
+      if (!user && session) {
+        try {
+          const { data: { user: refreshedUser } } = await supabase.auth.getUser();
+          if (refreshedUser) {
+            return response;
+          }
+        } catch (error) {
+          console.error('Error refreshing user:', error);
+        }
+      }
+      
+      // If still no user, redirect to login
+      if (!user) {
+        console.log('Middleware: Redirecting to login for protected path:', request.nextUrl.pathname);
+        const redirectUrl = new URL('/login', request.url);
+        redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname);
+        return NextResponse.redirect(redirectUrl);
+      }
     }
 
     // Redirect to dashboard if accessing auth pages while authenticated

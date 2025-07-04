@@ -27,11 +27,27 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
       setSupabase(client);
 
       const getUser = async () => {
-        const { data: { user } } = await client.auth.getUser();
-        setUser(user);
-        setLoading(false);
+        try {
+          // First try to get the session
+          const { data: { session } } = await client.auth.getSession();
+          
+          if (session?.user) {
+            setUser(session.user);
+            setLoading(false);
+            return;
+          }
 
-        if (!user) {
+          // If no session, try to get user directly
+          const { data: { user } } = await client.auth.getUser();
+          setUser(user);
+          setLoading(false);
+
+          if (!user) {
+            router.push('/login');
+          }
+        } catch (error) {
+          console.error('Error getting user in AuthGuard:', error);
+          setLoading(false);
           router.push('/login');
         }
       };
@@ -40,9 +56,11 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
 
       const { data: { subscription } } = client.auth.onAuthStateChange(
         (event: string, session: any) => {
+          console.log('Auth state change:', event, !!session);
           if (event === 'SIGNED_OUT' || !session) {
+            setUser(null);
             router.push('/login');
-          } else if (event === 'SIGNED_IN') {
+          } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             setUser(session.user);
           }
         }
