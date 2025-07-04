@@ -61,6 +61,20 @@ export const createMiddlewareClient = (request: NextRequest) => {
     },
   });
 
+  // Check if environment variables are available
+  if (!supabaseUrl || !supabaseAnonKey) {
+    // Return a mock client that won't cause errors
+    return {
+      supabase: {
+        auth: {
+          getSession: async () => ({ data: { session: null }, error: null }),
+          getUser: async () => ({ data: { user: null }, error: null })
+        }
+      } as any,
+      response
+    };
+  }
+
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get(name: string) {
