@@ -3,6 +3,8 @@ import { Footer } from '@/components/layout/footer';
 import { AuthGuard } from '@/components/auth/auth-guard';
 import { UserProvider } from '@/hooks/use-user';
 
+export const dynamic = 'force-dynamic';
+
 export default function DashboardLayout({
   children,
 }: {

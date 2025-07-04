@@ -13,34 +13,46 @@ interface AuthGuardProps {
 export function AuthGuard({ children, fallback }: AuthGuardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
-  const supabase = createClientComponentClient();
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
-
-      if (!user) {
-        router.push('/login');
+    // Initialize Supabase client only on the client side
+    if (typeof window !== 'undefined') {
+      const client = createClientComponentClient();
+      if (!client) {
+        setLoading(false);
+        return;
       }
-    };
+      setSupabase(client);
 
-    getUser();
+      const getUser = async () => {
+        const { data: { user } } = await client.auth.getUser();
+        setUser(user);
+        setLoading(false);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event: string, session: any) => {
-        if (event === 'SIGNED_OUT' || !session) {
+        if (!user) {
           router.push('/login');
-        } else if (event === 'SIGNED_IN') {
-          setUser(session.user);
         }
-      }
-    );
+      };
 
-    return () => subscription.unsubscribe();
-  }, [router, supabase.auth]);
+      getUser();
+
+      const { data: { subscription } } = client.auth.onAuthStateChange(
+        (event: string, session: any) => {
+          if (event === 'SIGNED_OUT' || !session) {
+            router.push('/login');
+          } else if (event === 'SIGNED_IN') {
+            setUser(session.user);
+          }
+        }
+      );
+
+      return () => subscription.unsubscribe();
+    } else {
+      setLoading(false);
+    }
+  }, [router]);
 
   if (loading) {
     return (
