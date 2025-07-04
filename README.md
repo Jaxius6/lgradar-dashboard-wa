@@ -210,6 +210,8 @@ The project includes optimized build settings:
 - OAuth providers (Google, Apple) - configurable
 - Row Level Security (RLS) for data isolation
 
+**Note:** For OAuth configuration in production, see [`docs/OAUTH_CONFIGURATION.md`](docs/OAUTH_CONFIGURATION.md)
+
 ### Gazette Management
 
 - Paginated gazette listing

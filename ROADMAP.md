@@ -27,6 +27,9 @@ This document tracks the development progress and planned features for the LG Ra
 - [x] Enhanced session cookie management in OAuth callback route
 - [x] Optimized middleware to prevent interference with OAuth flow
 - [x] Improved AuthGuard component for better OAuth session detection
+- [x] Fixed OAuth redirect URL configuration for production deployment
+- [x] Created comprehensive OAuth configuration documentation
+- [x] Updated environment variable handling for production domains
 
 ## 2025-01-07 - Production Deployment Ready
 
