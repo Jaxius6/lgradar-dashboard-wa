@@ -80,7 +80,7 @@ export default function SignupPage() {
             full_name: formData.fullName,
             organisation_name: formData.organisationName,
           },
-          emailRedirectTo: `${window.location.origin}/gazettes`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
@@ -106,7 +106,7 @@ export default function SignupPage() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/gazettes`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 

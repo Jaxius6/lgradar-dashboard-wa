@@ -30,6 +30,7 @@ To enable Google OAuth in Supabase:
 4. Add authorized redirect URIs:
    - `https://memlxbsitkqvgitjubfo.supabase.co/auth/v1/callback`
    - `http://localhost:3000/auth/callback` (for development)
+   - `https://your-domain.vercel.app/auth/callback` (for production)
 
 #### Google Cloud Console Setup
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
@@ -72,7 +73,14 @@ Run the SQL commands in `supabase/rls-policies.sql` to set up:
 ### Authentication Pages
 - `/login` - Email, magic link, and Google OAuth
 - `/signup` - Account creation with Google OAuth option
-- `/auth/callback` - OAuth callback handling
+- `/auth/callback` - OAuth callback handling (automatically redirects to `/gazettes`)
+
+### OAuth Callback Route
+The `/auth/callback` route handler processes OAuth authentication:
+- Exchanges authorization code for session
+- Handles authentication errors gracefully
+- Redirects to dashboard on success
+- Redirects to login with error on failure
 
 ## 4. User Management
 
@@ -92,6 +100,13 @@ Stored in `auth.users.user_metadata`:
 - `full_name`: User's display name
 - `organisation_name`: Organisation identifier
 - `organisation_id`: UUID reference to organisation
+- `avatar_url`: Profile picture URL (from Google OAuth)
+
+### Profile Picture Support
+- Google OAuth users automatically get their profile picture
+- Displays in sidebar user section
+- Falls back to initials for email/password users
+- Responsive design with proper image sizing
 
 ## 5. Implementation Details
 
