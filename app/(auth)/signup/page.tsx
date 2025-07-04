@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createClientComponentClient } from '@/lib/supabase-client';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -91,6 +92,31 @@ export default function SignupPage() {
     } catch (err) {
       setError('An unexpected error occurred');
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    if (!supabase) return;
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/gazettes`,
+        },
+      });
+
+      if (error) {
+        setError(error.message);
+        setIsLoading(false);
+      }
+      // If successful, user will be redirected, so no need to set loading to false
+    } catch (err) {
+      setError('An unexpected error occurred');
       setIsLoading(false);
     }
   };
@@ -251,6 +277,27 @@ export default function SignupPage() {
               {isLoading ? 'Creating account...' : 'Create account'}
             </Button>
           </form>
+
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full mt-4"
+            onClick={handleGoogleSignup}
+            disabled={isLoading}
+          >
+            <FcGoogle className="h-4 w-4 mr-2" />
+            Sign up with Google
+          </Button>
 
           <div className="text-center text-sm mt-4">
             <span className="text-muted-foreground">Already have an account? </span>

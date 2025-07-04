@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createClientComponentClient } from '@/lib/supabase-client';
 import { Eye, EyeOff, Mail } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -81,6 +82,31 @@ export default function LoginPage() {
     } catch (err) {
       setError('An unexpected error occurred');
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    if (!supabase) return;
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/gazettes`,
+        },
+      });
+
+      if (error) {
+        setError(error.message);
+        setIsLoading(false);
+      }
+      // Don't set loading to false here as we're redirecting
+    } catch (err) {
+      setError('An unexpected error occurred');
       setIsLoading(false);
     }
   };
@@ -191,15 +217,25 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={handleMagicLink}
-            disabled={isLoading}
-          >
-            <Mail className="h-4 w-4 mr-2" />
-            Send magic link
-          </Button>
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              variant="outline"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+            >
+              <FcGoogle className="h-4 w-4 mr-2" />
+              Google
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={handleMagicLink}
+              disabled={isLoading}
+            >
+              <Mail className="h-4 w-4 mr-2" />
+              Magic link
+            </Button>
+          </div>
 
           <div className="text-center text-sm">
             <span className="text-muted-foreground">Don&apos;t have an account? </span>
