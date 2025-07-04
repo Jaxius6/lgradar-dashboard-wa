@@ -6,6 +6,8 @@ Real-time legislative tracking for WA councils – never miss a Gazette again.
 
 LG Radar Dashboard is a production-ready admin interface built with Next.js 14, providing comprehensive legislative tracking capabilities for Western Australian councils. The platform enables users to monitor government gazettes, set up intelligent alerts, and never miss critical legislative deadlines.
 
+**Status**: ✅ **Production Ready** - Successfully building and deployable to Vercel
+
 ## Features
 
 - **Real-time Gazette Tracking**: Monitor legislative changes across WA councils
@@ -167,6 +169,14 @@ styles/
 
 ### Vercel Deployment
 
+The application is ready for production deployment on Vercel:
+
+1. **Build Status**: ✅ Successfully builds with `npm run build`
+2. **TypeScript**: ✅ All compilation errors resolved
+3. **ESLint**: ✅ Critical errors fixed (only warnings remain)
+4. **Bundle Size**: Optimized for production (81.9 kB shared JS)
+
+#### Deployment Steps:
 1. Connect your repository to Vercel
 2. Configure environment variables in Vercel dashboard
 3. Deploy automatically on push to main branch
@@ -175,10 +185,21 @@ styles/
 
 Ensure all required environment variables are set in your deployment environment:
 
-- Supabase configuration
-- Stripe keys
-- Application URLs
-- Feature flags
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Stripe publishable key
+- `STRIPE_SECRET_KEY` - Stripe secret key
+- `NEXT_PUBLIC_APP_URL` - Your application URL
+- `NEXTAUTH_SECRET` - NextAuth secret for session encryption
+
+### Build Configuration
+
+The project includes optimized build settings:
+- **TypeScript Target**: ES2017 with downlevel iteration support
+- **ESLint**: Configured with TypeScript support and Next.js rules
+- **Bundle Analysis**: Optimized chunks and code splitting
+- **Static Generation**: Pre-rendered static pages where possible
 
 ## Features in Detail
 

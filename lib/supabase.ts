@@ -42,7 +42,7 @@ export const createRouteHandlerClient = (request: NextRequest) => {
 
 // Server-side Supabase client for Middleware
 export const createMiddlewareClient = (request: NextRequest) => {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
