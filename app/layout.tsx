@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   creator: 'LG Radar',
   publisher: 'LG Radar',
   robots: 'noindex, nofollow', // Private dashboard
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export const viewport = {
@@ -27,6 +32,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+      </head>
       <body className={inter.className}>
         <div className="min-h-screen bg-background text-foreground">
           {children}

@@ -30,12 +30,40 @@ export default function ContactPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    // TODO: Implement Formspree integration
-    // For now, simulate form submission
-    setTimeout(() => {
+    try {
+      const response = await fetch('https://n8n.jaxius.net/webhook/9b5def4e-cbd1-4512-8fdd-b8f10f300d74', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        setIsSubmitted(true);
+        // Trigger confetti animation
+        if (typeof window !== 'undefined' && (window as any).confetti) {
+          (window as any).confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message. Please try again.');
+    } finally {
       setIsLoading(false);
-      setIsSubmitted(true);
-    }, 1000);
+    }
   };
 
   if (isSubmitted) {
@@ -48,7 +76,7 @@ export default function ContactPage() {
             </div>
             <h2 className="text-2xl font-bold mb-2">Message Sent Successfully</h2>
             <p className="text-muted-foreground mb-6">
-              Thank you for contacting us. We&apos;ll get back to you within 24 hours.
+              Thank you for contacting us. We typically respond within 2-4 hours.
             </p>
             <Button onClick={() => setIsSubmitted(false)}>
               Send Another Message
@@ -86,7 +114,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="font-medium">Email Support</p>
-                  <p className="text-sm text-muted-foreground">support@lgradar.com.au</p>
+                  <p className="text-sm text-muted-foreground">lgradarwa@gmail.com.au</p>
                 </div>
               </div>
               
@@ -96,7 +124,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="font-medium">Phone Support</p>
-                  <p className="text-sm text-muted-foreground">+61 8 1234 5678</p>
+                  <p className="text-sm text-muted-foreground">+61 427 931 745</p>
                 </div>
               </div>
               
@@ -123,7 +151,7 @@ export default function ContactPage() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Saturday</span>
-                <Badge variant="outline">10:00 AM - 2:00 PM</Badge>
+                <Badge variant="secondary">Closed</Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Sunday</span>
@@ -213,7 +241,7 @@ export default function ContactPage() {
                     {isLoading ? 'Sending...' : 'Send Message'}
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    We typically respond within 24 hours
+                    We typically respond within 2-4 hours
                   </p>
                 </div>
               </form>

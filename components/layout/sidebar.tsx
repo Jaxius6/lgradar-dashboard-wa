@@ -21,7 +21,7 @@ import { useUser } from '@/hooks/use-user';
 const navigation = [
   { name: 'Gazettes', href: '/gazettes', icon: FileText },
   { name: 'Alerts', href: '/alerts', icon: Bell },
-  { name: 'Activity Logs', href: '/logs', icon: Activity },
+  { name: 'Logs', href: '/logs', icon: Activity },
   { name: 'Billing', href: '/billing', icon: CreditCard },
   { name: 'Contact', href: '/contact', icon: Mail },
   { name: 'Settings', href: '/settings', icon: Settings },

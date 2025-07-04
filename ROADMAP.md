@@ -2,6 +2,28 @@
 
 This document tracks the development progress and planned features for the LG Radar Dashboard.
 
+## 2025-01-07 - Dashboard Enhancement Update
+
+### ✅ Recent Enhancements Completed
+- [x] Contact page overhaul with updated information and webhook integration
+- [x] Billing page updated with new pricing ($197/month)
+- [x] Navigation renamed from "Activity Logs" to "Logs"
+- [x] Created comprehensive Terms of Service page
+- [x] Created detailed Privacy Policy page
+- [x] Fixed logs page 404 error with full activity logs implementation
+- [x] Updated support contact information (lgradarwa@gmail.com.au, +61 427 931 745)
+- [x] Changed support hours (Monday-Friday, Saturday-Sunday closed)
+- [x] Updated response time to 2-4 hours
+- [x] Integrated webhook form submission to n8n endpoint
+- [x] Added confetti animation on successful form submission
+- [x] Updated README.md and ROADMAP.md documentation
+
+### 🔧 Authentication & User Experience
+- [x] Fixed Google OAuth redirect issues for proper callback handling
+- [x] Implemented Google profile picture support in sidebar
+- [x] Enhanced OAuth callback route for secure authentication flow
+- [x] Improved user feedback with success animations
+
 ## 2025-01-07 - Production Deployment Ready
 
 ### ✅ Deployment Issues Resolved

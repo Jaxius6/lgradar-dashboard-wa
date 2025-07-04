@@ -250,6 +250,31 @@ The project includes optimized build settings:
 
 This project is proprietary software owned by LG Radar.
 
+## Recent Updates (January 2025)
+
+### Dashboard Enhancements
+- **Contact System**: Updated contact information and integrated webhook form submission with confetti animations
+- **Billing Updates**: Current plan pricing updated to $197/month
+- **Navigation**: Renamed "Activity Logs" to "Logs" for better clarity
+- **Legal Pages**: Added comprehensive Terms of Service and Privacy Policy pages
+- **Response Time**: Improved support response time to 2-4 hours
+- **Support Hours**: Updated to Monday-Friday operations (Saturday-Sunday closed)
+
+### Authentication Improvements
+- **OAuth Integration**: Fixed Google OAuth redirect issues for seamless authentication
+- **Profile Pictures**: Added Google profile picture support in sidebar navigation
+- **Callback Handling**: Implemented proper OAuth callback route for secure authentication flow
+
+### Technical Enhancements
+- **Webhook Integration**: Contact form now submits to n8n webhook endpoint
+- **Form Validation**: Enhanced contact form with proper error handling
+- **UI/UX**: Added success animations and improved user feedback
+- **Documentation**: Updated README and ROADMAP to reflect current state
+
 ## Support
 
-For support, email support@lgradar.com.au or visit our contact page in the dashboard.
+For support, email **lgradarwa@gmail.com.au** or call **+61 427 931 745**.
+Visit our contact page in the dashboard for direct support requests.
+
+**Support Hours**: Monday - Friday (Saturday-Sunday closed)
+**Response Time**: We typically respond within 2-4 hours

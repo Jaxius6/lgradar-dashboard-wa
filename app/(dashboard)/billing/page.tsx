@@ -31,7 +31,7 @@ export default function BillingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center p-4 border rounded-lg">
               <DollarSign className="h-8 w-8 mx-auto mb-2 text-brand-500" />
-              <p className="text-2xl font-bold">$99</p>
+              <p className="text-2xl font-bold">$197</p>
               <p className="text-sm text-muted-foreground">per month</p>
             </div>
             
