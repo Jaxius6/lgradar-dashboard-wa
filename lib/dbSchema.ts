@@ -33,8 +33,28 @@ export const ProfileSchema = BaseSchema.extend({
   last_login: z.string().datetime().optional(),
 });
 
-// Gazette schema
-export const GazetteSchema = BaseSchema.extend({
+// Gazette schema - matches the actual Supabase table structure
+export const GazetteSchema = z.object({
+  id: z.number(),
+  date: z.string().nullable(),
+  emoji: z.string().nullable(),
+  category: z.string().nullable(),
+  jurisdiction: z.string().nullable(),
+  act: z.string().nullable(),
+  title: z.string().nullable(),
+  impact: z.string().nullable(),
+  created_at: z.string().nullable(),
+  link: z.string().nullable(),
+  pubdate: z.string().nullable(),
+  gaz_id: z.string().nullable(),
+  gaz_num: z.number().nullable(),
+  numpages: z.number().nullable(),
+  author: z.string().nullable(),
+  next_sit: z.string().nullable(),
+});
+
+// Legacy Gazette schema for backwards compatibility
+export const LegacyGazetteSchema = BaseSchema.extend({
   title: z.string().min(1),
   summary: z.string().optional(),
   content: z.string().optional(),
@@ -156,6 +176,7 @@ export const ContactFormSchema = z.object({
 export type Organisation = z.infer<typeof OrganisationSchema>;
 export type Profile = z.infer<typeof ProfileSchema>;
 export type Gazette = z.infer<typeof GazetteSchema>;
+export type LegacyGazette = z.infer<typeof LegacyGazetteSchema>;
 export type Alert = z.infer<typeof AlertSchema>;
 export type ActivityLog = z.infer<typeof ActivityLogSchema>;
 export type TeamInvitation = z.infer<typeof TeamInvitationSchema>;

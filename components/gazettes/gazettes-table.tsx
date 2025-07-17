@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,81 +12,94 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate, formatCountdown, getRiskBadgeVariant } from '@/lib/utils';
-import { Eye, ExternalLink, Clock } from 'lucide-react';
+import { Eye, ExternalLink, Clock, AlertCircle } from 'lucide-react';
 import { GazetteDetailDrawer } from './gazette-detail-drawer';
+import { Gazette } from '@/lib/dbSchema';
+import { getGazettes } from '@/lib/actions/gazettes';
+import { calculateRiskRating, isGazetteRelevant, getDaysUntilNextSitting } from '@/lib/gazette-utils';
 
-// Mock data - replace with real data from Supabase
-const mockGazettes = [
-  {
-    id: '1',
-    title: 'Local Planning Policy Amendment - Residential Development Standards',
-    summary: 'Proposed changes to minimum lot sizes and building setbacks in residential zones.',
-    publication_date: '2025-01-03T09:00:00Z',
-    council_name: 'City of Perth',
-    risk_rating: 'high' as const,
-    disallowance_deadline: '2025-01-17T17:00:00Z',
-    is_relevant: true,
-    gazette_number: 'G001/2025',
-  },
-  {
-    id: '2',
-    title: 'Waste Management Local Law 2025',
-    summary: 'New regulations for commercial waste collection and disposal requirements.',
-    publication_date: '2025-01-02T14:30:00Z',
-    council_name: 'City of Fremantle',
-    risk_rating: 'medium' as const,
-    disallowance_deadline: '2025-01-16T17:00:00Z',
-    is_relevant: false,
-    gazette_number: 'G002/2025',
-  },
-  {
-    id: '3',
-    title: 'Public Open Space Contribution Policy',
-    summary: 'Updated contribution rates for public open space in new developments.',
-    publication_date: '2025-01-01T11:15:00Z',
-    council_name: 'City of Joondalup',
-    risk_rating: 'low' as const,
-    disallowance_deadline: '2025-01-15T17:00:00Z',
-    is_relevant: true,
-    gazette_number: 'G003/2025',
-  },
-  {
-    id: '4',
-    title: 'Parking Management Strategy Implementation',
-    summary: 'New paid parking zones and time restrictions in commercial areas.',
-    publication_date: '2024-12-30T16:45:00Z',
-    council_name: 'City of Subiaco',
-    risk_rating: 'medium' as const,
-    disallowance_deadline: '2025-01-13T17:00:00Z',
-    is_relevant: true,
-    gazette_number: 'G004/2025',
-  },
-  {
-    id: '5',
-    title: 'Heritage Conservation Area Expansion',
-    summary: 'Extension of heritage protection to additional properties in the town centre.',
-    publication_date: '2024-12-29T10:20:00Z',
-    council_name: 'Town of Cottesloe',
-    risk_rating: 'high' as const,
-    disallowance_deadline: '2025-01-12T17:00:00Z',
-    is_relevant: false,
-    gazette_number: 'G005/2025',
-  },
-];
+interface GazetteTableProps {
+  searchQuery?: string;
+}
 
-export function GazettesTable() {
-  const [selectedGazette, setSelectedGazette] = useState<typeof mockGazettes[0] | null>(null);
+export function GazettesTable({ searchQuery }: GazetteTableProps) {
+  const [gazettes, setGazettes] = useState<Gazette[]>([]);
+  const [selectedGazette, setSelectedGazette] = useState<Gazette | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleRowClick = (gazette: typeof mockGazettes[0]) => {
+  useEffect(() => {
+    async function fetchGazettes() {
+      setLoading(true);
+      setError(null);
+      
+      const { data, error: fetchError } = await getGazettes({
+        search: searchQuery,
+        limit: 50
+      });
+      
+      if (fetchError) {
+        setError(fetchError);
+      } else {
+        setGazettes(data);
+      }
+      
+      setLoading(false);
+    }
+
+    fetchGazettes();
+  }, [searchQuery]);
+
+  const handleRowClick = (gazette: Gazette) => {
     setSelectedGazette(gazette);
     setIsDrawerOpen(true);
   };
 
-  const handleViewDetails = (gazette: typeof mockGazettes[0], e: React.MouseEvent) => {
+  const handleViewDetails = (gazette: Gazette, e: React.MouseEvent) => {
     e.stopPropagation();
     handleRowClick(gazette);
   };
+
+  const handleExternalLink = (gazette: Gazette, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (gazette.link) {
+      window.open(gazette.link, '_blank');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="rounded-md border">
+        <div className="p-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading gazettes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-md border">
+        <div className="p-8 text-center">
+          <AlertCircle className="h-8 w-8 text-destructive mx-auto mb-4" />
+          <p className="text-destructive font-medium mb-2">Error loading gazettes</p>
+          <p className="text-muted-foreground text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (gazettes.length === 0) {
+    return (
+      <div className="rounded-md border">
+        <div className="p-8 text-center">
+          <p className="text-muted-foreground">No gazettes found.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -96,88 +109,121 @@ export function GazettesTable() {
             <TableRow>
               <TableHead className="w-[100px]">Date</TableHead>
               <TableHead>Title</TableHead>
-              <TableHead className="w-[150px]">Council</TableHead>
+              <TableHead className="w-[150px]">Jurisdiction</TableHead>
+              <TableHead className="w-[100px]">Category</TableHead>
               <TableHead className="w-[100px]">Risk</TableHead>
-              <TableHead className="w-[120px]">Countdown</TableHead>
+              <TableHead className="w-[120px]">Next Sitting</TableHead>
               <TableHead className="w-[100px]">Relevant</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockGazettes.map((gazette) => (
-              <TableRow
-                key={gazette.id}
-                className="data-table-row"
-                onClick={() => handleRowClick(gazette)}
-              >
-                <TableCell className="font-medium">
-                  {formatDate(gazette.publication_date, 'MMM dd')}
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-1">
-                    <p className="font-medium leading-none">{gazette.title}</p>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {gazette.summary}
-                    </p>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="space-y-1">
-                    <p className="font-medium text-sm">{gazette.council_name}</p>
-                    <p className="text-xs text-muted-foreground">{gazette.gazette_number}</p>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getRiskBadgeVariant(gazette.risk_rating)}>
-                    {gazette.risk_rating}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-1">
-                    <Clock className="h-3 w-3 text-muted-foreground" />
-                    <span className="countdown-timer">
-                      {formatCountdown(gazette.disallowance_deadline)}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {gazette.is_relevant ? (
-                    <Badge variant="brand" className="text-xs">
-                      Yes
-                    </Badge>
-                  ) : (
+            {gazettes.map((gazette) => {
+              const riskRating = calculateRiskRating(gazette);
+              const isRelevant = isGazetteRelevant(gazette);
+              const daysUntilSitting = getDaysUntilNextSitting(gazette);
+              
+              return (
+                <TableRow
+                  key={gazette.id}
+                  className="data-table-row cursor-pointer hover:bg-muted/50"
+                  onClick={() => handleRowClick(gazette)}
+                >
+                  <TableCell className="font-medium">
+                    {gazette.date ? formatDate(gazette.date, 'MMM dd') : 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <p className="font-medium leading-none">
+                        {gazette.title || 'Untitled'}
+                      </p>
+                      {gazette.impact && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {gazette.impact}
+                        </p>
+                      )}
+                      {gazette.emoji && (
+                        <span className="text-sm">{gazette.emoji}</span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <p className="font-medium text-sm">
+                        {gazette.jurisdiction || 'Unknown'}
+                      </p>
+                      {gazette.gaz_id && (
+                        <p className="text-xs text-muted-foreground">{gazette.gaz_id}</p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
                     <Badge variant="outline" className="text-xs">
-                      No
+                      {gazette.category || 'General'}
                     </Badge>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => handleViewDetails(gazette, e)}
-                    >
-                      <Eye className="h-4 w-4" />
-                      <span className="sr-only">View details</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // TODO: Open external link
-                      }}
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      <span className="sr-only">Open external link</span>
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getRiskBadgeVariant(riskRating)}>
+                      {riskRating}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {gazette.next_sit ? (
+                      <div className="flex items-center space-x-1">
+                        <Clock className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-sm">
+                          {daysUntilSitting !== null ? (
+                            daysUntilSitting > 0 ? (
+                              `${daysUntilSitting} days`
+                            ) : (
+                              'Passed'
+                            )
+                          ) : (
+                            formatDate(gazette.next_sit, 'MMM dd')
+                          )}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">N/A</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {isRelevant ? (
+                      <Badge variant="default" className="text-xs">
+                        Yes
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">
+                        No
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => handleViewDetails(gazette, e)}
+                      >
+                        <Eye className="h-4 w-4" />
+                        <span className="sr-only">View details</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => handleExternalLink(gazette, e)}
+                        disabled={!gazette.link}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        <span className="sr-only">Open external link</span>
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>

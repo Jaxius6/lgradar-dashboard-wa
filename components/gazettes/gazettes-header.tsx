@@ -1,20 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Search, Filter, Download, RefreshCw } from 'lucide-react';
+import { getGazetteStats, GazetteStats } from '@/lib/actions/gazettes';
 
-export function GazettesHeader() {
-  const [searchQuery, setSearchQuery] = useState('');
+interface GazettesHeaderProps {
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  onRefresh?: () => void;
+}
+
+export function GazettesHeader({ searchQuery, onSearchChange, onRefresh }: GazettesHeaderProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [stats, setStats] = useState<GazetteStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchStats() {
+      setStatsLoading(true);
+      const { data } = await getGazetteStats();
+      setStats(data);
+      setStatsLoading(false);
+    }
+    
+    fetchStats();
+  }, []);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
-    // Simulate refresh
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Refresh stats
+    const { data } = await getGazetteStats();
+    setStats(data);
+    
+    // Call parent refresh if provided
+    if (onRefresh) {
+      await onRefresh();
+    }
+    
     setIsRefreshing(false);
   };
 
@@ -58,9 +85,13 @@ export function GazettesHeader() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Gazettes</p>
-                <p className="text-2xl font-bold">1,247</p>
+                {statsLoading ? (
+                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                ) : (
+                  <p className="text-2xl font-bold">{stats?.total || 0}</p>
+                )}
               </div>
-              <Badge variant="secondary">+12 today</Badge>
+              <Badge variant="secondary">Live</Badge>
             </div>
           </CardContent>
         </Card>
@@ -70,7 +101,11 @@ export function GazettesHeader() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">High Risk</p>
-                <p className="text-2xl font-bold text-red-400">23</p>
+                {statsLoading ? (
+                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                ) : (
+                  <p className="text-2xl font-bold text-red-400">{stats?.highRisk || 0}</p>
+                )}
               </div>
               <Badge variant="destructive">Urgent</Badge>
             </div>
@@ -82,9 +117,13 @@ export function GazettesHeader() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Expiring Soon</p>
-                <p className="text-2xl font-bold text-yellow-400">8</p>
+                {statsLoading ? (
+                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                ) : (
+                  <p className="text-2xl font-bold text-yellow-400">{stats?.expiringSoon || 0}</p>
+                )}
               </div>
-              <Badge variant="warning">7 days</Badge>
+              <Badge variant="outline">7 days</Badge>
             </div>
           </CardContent>
         </Card>
@@ -94,9 +133,13 @@ export function GazettesHeader() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Relevant</p>
-                <p className="text-2xl font-bold text-brand-500">156</p>
+                {statsLoading ? (
+                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                ) : (
+                  <p className="text-2xl font-bold text-green-400">{stats?.relevant || 0}</p>
+                )}
               </div>
-              <Badge variant="brand">Flagged</Badge>
+              <Badge variant="default">Flagged</Badge>
             </div>
           </CardContent>
         </Card>
@@ -109,9 +152,9 @@ export function GazettesHeader() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search gazettes by title, council, or content..."
+                placeholder="Search gazettes by title, jurisdiction, or category..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => onSearchChange(e.target.value)}
                 className="pl-10"
               />
             </div>
