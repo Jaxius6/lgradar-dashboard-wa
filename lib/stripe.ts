@@ -10,7 +10,7 @@ const isStripeConfigured = () => {
 // Server-side Stripe instance - only create if properly configured
 export const stripe = isStripeConfigured()
   ? new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2024-06-20',
+      apiVersion: '2025-06-30.basil',
     })
   : null;
 
