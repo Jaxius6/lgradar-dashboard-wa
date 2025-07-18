@@ -16,6 +16,8 @@ import {
   X,
   LogOut,
   Table,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 
@@ -44,29 +46,16 @@ export function Sidebar({ className }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile menu button */}
+      {/* Mobile menu button - positioned in top bar */}
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="h-10 w-10"
+          className="h-8 w-8"
           aria-label="Toggle menu"
         >
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </Button>
-      </div>
-
-      {/* Desktop collapse button */}
-      <div className="hidden lg:block fixed top-4 left-4 z-50">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleCollapsed}
-          className="h-10 w-10"
-          aria-label="Toggle sidebar"
-        >
-          <Menu className="h-6 w-6" />
+          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </div>
 
@@ -93,20 +82,44 @@ export function Sidebar({ className }: SidebarProps) {
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
+          {/* Header with logo and desktop collapse button */}
           <div className={cn(
-            "flex items-center h-16 border-b border-border",
-            isCollapsed ? "px-2 justify-center" : "px-6"
+            "flex items-center h-16 border-b border-border relative",
+            isCollapsed ? "px-2 justify-center" : "px-6 justify-between"
           )}>
-            <Link href="/gazettes" className={cn(
-              "flex items-center",
-              isCollapsed ? "space-x-0" : "space-x-2"
-            )}>
-              <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-sm">LG</span>
-              </div>
-              {!isCollapsed && <span className="font-semibold text-lg">Radar</span>}
-            </Link>
+            {isCollapsed ? (
+              <button
+                onClick={toggleCollapsed}
+                className="flex items-center space-x-0 mx-auto hover:opacity-80 transition-opacity"
+                aria-label="Expand sidebar"
+              >
+                <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
+                  <span className="text-black font-bold text-sm">LG</span>
+                </div>
+              </button>
+            ) : (
+              <>
+                <Link href="/gazettes" className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
+                    <span className="text-black font-bold text-sm">LG</span>
+                  </div>
+                  <span className="font-semibold text-lg">Radar</span>
+                </Link>
+                
+                {/* Desktop collapse button - positioned inside sidebar */}
+                <div className="hidden lg:block">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleCollapsed}
+                    className="h-8 w-8"
+                    aria-label="Toggle sidebar"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Navigation */}

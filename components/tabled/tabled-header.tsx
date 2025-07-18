@@ -70,14 +70,61 @@ export function TabledHeader({
     <div className="space-y-6">
       {/* Page title and actions */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        <div className="space-y-1">
+        <div className="space-y-1 hidden lg:block">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">Tabled Papers</h1>
           <p className="text-muted-foreground text-sm">
             Track papers tabled in WA parliament
           </p>
         </div>
         
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+        {/* Mobile: Compact single row layout */}
+        <div className="lg:hidden flex items-center gap-2">
+          {/* Search bar */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search tabled items"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-10 pr-10 h-9"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7"
+                onClick={() => onSearchChange('')}
+              >
+                <X className="h-3 w-3" />
+                <span className="sr-only">Clear search</span>
+              </Button>
+            )}
+          </div>
+          
+          {/* Action buttons - icon only */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="h-9 w-9 flex-shrink-0"
+            title="Refresh"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleExport}
+            className="h-9 w-9 flex-shrink-0"
+            title="Export"
+          >
+            <Download className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        {/* Desktop: Original layout */}
+        <div className="hidden lg:flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           {/* Search bar */}
           <div className="relative flex-1 min-w-0 sm:min-w-[250px] lg:min-w-[300px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
