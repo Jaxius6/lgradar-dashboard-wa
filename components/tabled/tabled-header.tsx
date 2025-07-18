@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, Filter, Download, RefreshCw, X } from 'lucide-react';
+import { getTabledItemTypes } from '@/lib/actions/tabled';
 
 interface TabledHeaderProps {
   searchQuery: string;
@@ -14,26 +15,28 @@ interface TabledHeaderProps {
   onRefresh?: () => void;
 }
 
-const AVAILABLE_TYPES = [
-  'Motion',
-  'Notice',
-  'Bill',
-  'Report',
-  'Petition',
-  'Amendment',
-  'Question',
-  'Statement'
-];
 
-export function TabledHeader({ 
-  searchQuery, 
-  onSearchChange, 
-  selectedTypes, 
-  onTypesChange, 
-  onRefresh 
+export function TabledHeader({
+  searchQuery,
+  onSearchChange,
+  selectedTypes,
+  onTypesChange,
+  onRefresh
 }: TabledHeaderProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
+  const [availableTypes, setAvailableTypes] = useState<string[]>([]);
+  const [typesLoading, setTypesLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchTypes() {
+      setTypesLoading(true);
+      const { data } = await getTabledItemTypes();
+      setAvailableTypes(data as string[]);
+      setTypesLoading(false);
+    }
+    
+    fetchTypes();
+  }, []);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -67,9 +70,9 @@ export function TabledHeader({
       {/* Page title and actions */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="space-y-1">
-          <h1 className="text-4xl font-bold tracking-tight">Tabled</h1>
+          <h1 className="text-4xl font-bold tracking-tight">Tabled Papers</h1>
           <p className="text-muted-foreground text-sm">
-            Track parliamentary papers and motions
+            Track papers tabled in WA parliament
           </p>
         </div>
         
@@ -101,19 +104,6 @@ export function TabledHeader({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filters
-              {selectedTypes.length > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {selectedTypes.length}
-                </Badge>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
@@ -128,19 +118,21 @@ export function TabledHeader({
         </div>
       </div>
 
-      {/* Filters */}
-      {showFilters && (
-        <div className="bg-muted/50 rounded-lg p-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium">Filter by Type</h3>
-            {(selectedTypes.length > 0 || searchQuery) && (
-              <Button variant="ghost" size="sm" onClick={clearAllFilters}>
-                Clear all
-              </Button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {AVAILABLE_TYPES.map((type) => (
+      {/* Filters - Always visible */}
+      <div className="bg-muted/50 rounded-lg p-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium">Filter by Type</h3>
+          {(selectedTypes.length > 0 || searchQuery) && (
+            <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+              Clear all
+            </Button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {typesLoading ? (
+            <div className="text-sm text-muted-foreground">Loading types...</div>
+          ) : (
+            availableTypes.map((type) => (
               <Button
                 key={type}
                 variant={selectedTypes.includes(type) ? "default" : "outline"}
@@ -149,10 +141,10 @@ export function TabledHeader({
               >
                 {type}
               </Button>
-            ))}
-          </div>
+            ))
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

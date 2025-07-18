@@ -12,8 +12,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate, formatCountdown, getRiskBadgeVariant } from '@/lib/utils';
-import { Eye, ExternalLink, Clock, AlertCircle, Flag, Check, Globe, ExternalLinkIcon } from 'lucide-react';
+import { Eye, ExternalLinkIcon, Clock, AlertCircle, Flag, Check } from 'lucide-react';
 import { GazetteDetailDrawer } from './gazette-detail-drawer';
+import { SortableHeader } from '@/components/ui/sortable-header';
 import { Gazette } from '@/lib/dbSchema';
 import { getGazettes } from '@/lib/actions/gazettes';
 import { calculateRiskRating, isGazetteRelevant, getDaysUntilNextSitting } from '@/lib/gazette-utils';
@@ -28,6 +29,7 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
   useEffect(() => {
     async function fetchGazettes() {
@@ -50,6 +52,36 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
 
     fetchGazettes();
   }, [searchQuery]);
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+
+    // Sort the items
+    const sortedItems = [...gazettes].sort((a, b) => {
+      let aValue: any = a[key as keyof Gazette];
+      let bValue: any = b[key as keyof Gazette];
+
+      // Handle null/undefined values
+      if (aValue === null || aValue === undefined) aValue = '';
+      if (bValue === null || bValue === undefined) bValue = '';
+
+      // Convert to string for comparison
+      aValue = String(aValue).toLowerCase();
+      bValue = String(bValue).toLowerCase();
+
+      if (direction === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+
+    setGazettes(sortedItems);
+  };
 
   const handleRowClick = (gazette: Gazette) => {
     setSelectedGazette(gazette);
@@ -107,12 +139,60 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Published</TableHead>
-              <TableHead>Title</TableHead>
-              <TableHead className="w-[150px]">Jurisdiction</TableHead>
-              <TableHead className="w-[100px]">Category</TableHead>
-              <TableHead className="w-[100px]">Effective</TableHead>
-              <TableHead className="w-[120px]">Disallowance</TableHead>
+              <TableHead className="w-[100px]">
+                <SortableHeader
+                  sortKey="pubdate"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                >
+                  Published
+                </SortableHeader>
+              </TableHead>
+              <TableHead>
+                <SortableHeader
+                  sortKey="title"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                >
+                  Title
+                </SortableHeader>
+              </TableHead>
+              <TableHead className="w-[150px]">
+                <SortableHeader
+                  sortKey="jurisdiction"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                >
+                  Jurisdiction
+                </SortableHeader>
+              </TableHead>
+              <TableHead className="w-[100px]">
+                <SortableHeader
+                  sortKey="category"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                >
+                  Category
+                </SortableHeader>
+              </TableHead>
+              <TableHead className="w-[100px]">
+                <SortableHeader
+                  sortKey="date"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                >
+                  Effective
+                </SortableHeader>
+              </TableHead>
+              <TableHead className="w-[120px]">
+                <SortableHeader
+                  sortKey="next_sit"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                >
+                  Disallowance
+                </SortableHeader>
+              </TableHead>
               <TableHead className="w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>

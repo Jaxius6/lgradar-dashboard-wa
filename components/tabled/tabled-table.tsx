@@ -14,8 +14,26 @@ import {
 import { formatDate } from '@/lib/utils';
 import { Eye, ExternalLinkIcon, AlertCircle, Flag, Check } from 'lucide-react';
 import { TabledDetailDrawer } from './tabled-detail-drawer';
+import { SortableHeader } from '@/components/ui/sortable-header';
 import { Tabled } from '@/lib/dbSchema';
 import { getTabledItems } from '@/lib/actions/tabled';
+
+// Type color mapping
+const getTypeColor = (type: string) => {
+  const colors: { [key: string]: string } = {
+    'Petition': 'text-purple-600',
+    'Motion': 'text-blue-600',
+    'Notice': 'text-green-600',
+    'Bill': 'text-red-600',
+    'Report': 'text-orange-600',
+    'Amendment': 'text-yellow-600',
+    'Question': 'text-pink-600',
+    'Statement': 'text-indigo-600',
+    'Paper': 'text-teal-600',
+    'Document': 'text-cyan-600',
+  };
+  return colors[type] || 'text-gray-600';
+};
 
 interface TabledTableProps {
   searchQuery?: string;
@@ -28,6 +46,7 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
   useEffect(() => {
     async function fetchTabledItems() {
@@ -51,6 +70,36 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
 
     fetchTabledItems();
   }, [searchQuery, selectedTypes]);
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+
+    // Sort the items
+    const sortedItems = [...tabledItems].sort((a, b) => {
+      let aValue: any = a[key as keyof Tabled];
+      let bValue: any = b[key as keyof Tabled];
+
+      // Handle null/undefined values
+      if (aValue === null || aValue === undefined) aValue = '';
+      if (bValue === null || bValue === undefined) bValue = '';
+
+      // Convert to string for comparison
+      aValue = String(aValue).toLowerCase();
+      bValue = String(bValue).toLowerCase();
+
+      if (direction === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+
+    setTabledItems(sortedItems);
+  };
 
   const handleRowClick = (item: Tabled) => {
     setSelectedItem(item);
@@ -136,10 +185,42 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Date</TableHead>
-              <TableHead className="w-[100px]">Type</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead className="w-[120px]">Paper No.</TableHead>
+              <TableHead className="w-[100px]">
+                <SortableHeader
+                  sortKey="date"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                >
+                  Date
+                </SortableHeader>
+              </TableHead>
+              <TableHead className="w-[150px]">
+                <SortableHeader
+                  sortKey="type"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                >
+                  Type
+                </SortableHeader>
+              </TableHead>
+              <TableHead>
+                <SortableHeader
+                  sortKey="name"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                >
+                  Name
+                </SortableHeader>
+              </TableHead>
+              <TableHead className="w-[120px]">
+                <SortableHeader
+                  sortKey="paper_no"
+                  currentSort={sortConfig}
+                  onSort={handleSort}
+                >
+                  Paper No.
+                </SortableHeader>
+              </TableHead>
               <TableHead className="w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -155,9 +236,9 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
                     {item.date ? formatDate(item.date, 'MMM dd') : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-xs">
+                    <span className={`font-medium text-sm ${getTypeColor(item.type || 'Unknown')}`}>
                       {item.type || 'Unknown'}
-                    </Badge>
+                    </span>
                   </TableCell>
                   <TableCell>
                     <div className="max-w-md">
