@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate, formatCountdown, getRiskBadgeVariant } from '@/lib/utils';
-import { Eye, ExternalLink, Clock, AlertCircle } from 'lucide-react';
+import { Eye, ExternalLink, Clock, AlertCircle, Flag, Check, Globe } from 'lucide-react';
 import { GazetteDetailDrawer } from './gazette-detail-drawer';
 import { Gazette } from '@/lib/dbSchema';
 import { getGazettes } from '@/lib/actions/gazettes';
@@ -107,20 +107,19 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Date</TableHead>
+              <TableHead className="w-[100px]">Published</TableHead>
+              <TableHead className="w-[100px]">Effective</TableHead>
               <TableHead>Title</TableHead>
               <TableHead className="w-[150px]">Jurisdiction</TableHead>
               <TableHead className="w-[100px]">Category</TableHead>
               <TableHead className="w-[100px]">Risk</TableHead>
-              <TableHead className="w-[120px]">Next Sitting</TableHead>
-              <TableHead className="w-[100px]">Relevant</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
+              <TableHead className="w-[120px]">Disallowance</TableHead>
+              <TableHead className="w-[140px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {gazettes.map((gazette) => {
               const riskRating = calculateRiskRating(gazette);
-              const isRelevant = isGazetteRelevant(gazette);
               const daysUntilSitting = getDaysUntilNextSitting(gazette);
               
               return (
@@ -130,32 +129,25 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                   onClick={() => handleRowClick(gazette)}
                 >
                   <TableCell className="font-medium">
+                    {gazette.pubdate ? formatDate(gazette.pubdate, 'MMM dd') : 'N/A'}
+                  </TableCell>
+                  <TableCell className="font-medium">
                     {gazette.date ? formatDate(gazette.date, 'MMM dd') : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      {gazette.emoji && (
+                        <span className="text-lg">{gazette.emoji}</span>
+                      )}
                       <p className="font-medium leading-none">
                         {gazette.title || 'Untitled'}
                       </p>
-                      {gazette.impact && (
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {gazette.impact}
-                        </p>
-                      )}
-                      {gazette.emoji && (
-                        <span className="text-sm">{gazette.emoji}</span>
-                      )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-1">
-                      <p className="font-medium text-sm">
-                        {gazette.jurisdiction || 'Unknown'}
-                      </p>
-                      {gazette.gaz_id && (
-                        <p className="text-xs text-muted-foreground">{gazette.gaz_id}</p>
-                      )}
-                    </div>
+                    <p className="font-medium text-sm">
+                      {gazette.jurisdiction || 'Unknown'}
+                    </p>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">
@@ -188,23 +180,13 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                     )}
                   </TableCell>
                   <TableCell>
-                    {isRelevant ? (
-                      <Badge variant="default" className="text-xs">
-                        Yes
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-xs">
-                        No
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
                     <div className="flex items-center space-x-1">
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
                         onClick={(e) => handleViewDetails(gazette, e)}
+                        title="View details"
                       >
                         <Eye className="h-4 w-4" />
                         <span className="sr-only">View details</span>
@@ -215,9 +197,36 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                         className="h-8 w-8"
                         onClick={(e) => handleExternalLink(gazette, e)}
                         disabled={!gazette.link}
+                        title="Open in new tab"
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        <Globe className="h-4 w-4" />
                         <span className="sr-only">Open external link</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: Implement flag functionality
+                        }}
+                        title="Flag for attention"
+                      >
+                        <Flag className="h-4 w-4" />
+                        <span className="sr-only">Flag</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: Implement mark as reviewed functionality
+                        }}
+                        title="Mark as reviewed"
+                      >
+                        <Check className="h-4 w-4" />
+                        <span className="sr-only">Mark as reviewed</span>
                       </Button>
                     </div>
                   </TableCell>

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, Download, RefreshCw } from 'lucide-react';
+import { Search, Filter, Download, RefreshCw, X } from 'lucide-react';
 import { getGazetteStats, GazetteStats } from '@/lib/actions/gazettes';
 
 interface GazettesHeaderProps {
@@ -155,8 +155,19 @@ export function GazettesHeader({ searchQuery, onSearchChange, onRefresh }: Gazet
                 placeholder="Search gazettes by title, jurisdiction, or category..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-10"
+                className="pl-10 pr-10"
               />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
+                  onClick={() => onSearchChange('')}
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Clear search</span>
+                </Button>
+              )}
             </div>
             <Button variant="outline" size="default">
               <Filter className="h-4 w-4 mr-2" />

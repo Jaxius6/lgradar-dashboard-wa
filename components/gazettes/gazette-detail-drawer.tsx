@@ -79,12 +79,35 @@ export function GazetteDetailDrawer({ gazette, open, onOpenChange }: GazetteDeta
           </div>
 
           {/* Key information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center">
                   <Calendar className="h-4 w-4 mr-2" />
-                  Publication Date
+                  Published Date
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {gazette.pubdate ? (
+                  <>
+                    <p className="text-lg font-semibold">
+                      {formatDate(gazette.pubdate, 'PPP')}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatDate(gazette.pubdate, 'p')}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-muted-foreground">Not specified</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Effective Date
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
@@ -107,7 +130,7 @@ export function GazetteDetailDrawer({ gazette, open, onOpenChange }: GazetteDeta
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center">
                   <Clock className="h-4 w-4 mr-2" />
-                  Next Sitting
+                  Disallowance Deadline
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
