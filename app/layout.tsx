@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import '@/styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -32,14 +33,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
       </head>
       <body className={inter.className}>
-        <div className="min-h-screen bg-background text-foreground">
-          {children}
-        </div>
+        <ThemeProvider>
+          <div className="min-h-screen bg-background text-foreground">
+            {children}
+          </div>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

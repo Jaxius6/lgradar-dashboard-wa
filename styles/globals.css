@@ -4,26 +4,50 @@
 
 @layer base {
   :root {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    /* Light Mode Colors */
+    --background: 0 0% 100%;           /* Pure white */
+    --foreground: 222.2 84% 4.9%;      /* Very dark blue-gray */
+    --card: 0 0% 100%;                 /* White cards */
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;      /* Dark blue-gray */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 210 40% 96%;          /* Light gray */
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;              /* Light gray */
+    --muted-foreground: 222.2 84% 4.9%;
+    --accent: 210 40% 96%;             /* Light gray */
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;     /* Red for errors */
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --border: 214.3 31.8% 91.4%;      /* Light border */
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 47.4% 11.2%;
     --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark Mode Colors (Default Theme) */
+    --background: 0 0% 13%;            /* #212121 - Dark gray */
+    --foreground: 0 0% 98%;            /* Near white */
+    --card: 0 0% 19%;                  /* #303030 - Medium gray */
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 19%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;               /* Near white */
+    --primary-foreground: 0 0% 13%;
+    --secondary: 0 0% 25%;             /* #414141 - Medium-light gray */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 25%;                 /* #414141 - Medium-light gray */
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 25%;                /* #414141 - Medium-light gray */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;     /* Dark red */
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 25%;                /* #414141 - Medium-light gray */
+    --input: 0 0% 25%;
+    --ring: 0 0% 83.1%;
   }
 }
 

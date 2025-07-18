@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   FileText,
   Bell,
@@ -93,21 +95,30 @@ export function Sidebar({ className }: SidebarProps) {
                 className="flex items-center space-x-0 mx-auto hover:opacity-80 transition-opacity"
                 aria-label="Expand sidebar"
               >
-                <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
-                  <span className="text-black font-bold text-sm">LG</span>
-                </div>
+                <Image
+                  src="/lgradarlogo.svg"
+                  alt="LG Radar"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8"
+                />
               </button>
             ) : (
               <>
                 <Link href="/gazettes" className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-brand-500 rounded-lg flex items-center justify-center">
-                    <span className="text-black font-bold text-sm">LG</span>
-                  </div>
+                  <Image
+                    src="/lgradarlogo.svg"
+                    alt="LG Radar"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8"
+                  />
                   <span className="font-semibold text-lg">Radar</span>
                 </Link>
                 
-                {/* Desktop collapse button - positioned inside sidebar */}
-                <div className="hidden lg:block">
+                {/* Desktop controls */}
+                <div className="hidden lg:flex items-center space-x-1">
+                  <ThemeToggle />
                   <Button
                     variant="ghost"
                     size="icon"
