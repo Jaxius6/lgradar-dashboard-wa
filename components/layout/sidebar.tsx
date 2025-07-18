@@ -23,7 +23,7 @@ const navigation = [
   { name: 'Alerts', href: '/alerts', icon: Bell },
   { name: 'Logs', href: '/logs', icon: Activity },
   { name: 'Billing', href: '/billing', icon: CreditCard },
-  { name: 'Contact', href: '/contact', icon: Mail },
+  { name: 'Contact', href: 'https://www.lgradar.com.au/contact', icon: Mail, external: true },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
@@ -94,6 +94,7 @@ export function Sidebar({ className }: SidebarProps) {
                     'nav-link',
                     isActive && 'nav-link-active'
                   )}
+                  {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 >
                   <item.icon className="h-5 w-5" />
                   <span>{item.name}</span>

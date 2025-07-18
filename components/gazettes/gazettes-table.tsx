@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate, formatCountdown, getRiskBadgeVariant } from '@/lib/utils';
-import { Eye, ExternalLink, Clock, AlertCircle, Flag, Check, Globe } from 'lucide-react';
+import { Eye, ExternalLink, Clock, AlertCircle, Flag, Check, Globe, ExternalLinkIcon } from 'lucide-react';
 import { GazetteDetailDrawer } from './gazette-detail-drawer';
 import { Gazette } from '@/lib/dbSchema';
 import { getGazettes } from '@/lib/actions/gazettes';
@@ -108,13 +108,13 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[100px]">Published</TableHead>
-              <TableHead className="w-[100px]">Effective</TableHead>
               <TableHead>Title</TableHead>
               <TableHead className="w-[150px]">Jurisdiction</TableHead>
               <TableHead className="w-[100px]">Category</TableHead>
               <TableHead className="w-[100px]">Risk</TableHead>
+              <TableHead className="w-[100px]">Effective</TableHead>
               <TableHead className="w-[120px]">Disallowance</TableHead>
-              <TableHead className="w-[140px]">Actions</TableHead>
+              <TableHead className="w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -130,9 +130,6 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                 >
                   <TableCell className="font-medium">
                     {gazette.pubdate ? formatDate(gazette.pubdate, 'MMM dd') : 'N/A'}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {gazette.date ? formatDate(gazette.date, 'MMM dd') : 'N/A'}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
@@ -159,11 +156,14 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                       {riskRating}
                     </Badge>
                   </TableCell>
+                  <TableCell className="font-medium">
+                    {gazette.date ? formatDate(gazette.date, 'MMM dd') : 'N/A'}
+                  </TableCell>
                   <TableCell>
                     {gazette.next_sit ? (
                       <div className="flex items-center space-x-1">
                         <Clock className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-sm">
+                        <span className={`text-sm ${daysUntilSitting !== null && daysUntilSitting < 7 && daysUntilSitting >= 0 ? 'text-red-500 font-medium' : ''}`}>
                           {daysUntilSitting !== null ? (
                             daysUntilSitting > 0 ? (
                               `${daysUntilSitting} days`
@@ -180,52 +180,52 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                     )}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center gap-0.5">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
                         onClick={(e) => handleViewDetails(gazette, e)}
                         title="View details"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3.5 w-3.5" />
                         <span className="sr-only">View details</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
                         onClick={(e) => handleExternalLink(gazette, e)}
                         disabled={!gazette.link}
                         title="Open in new tab"
                       >
-                        <Globe className="h-4 w-4" />
+                        <ExternalLinkIcon className="h-3.5 w-3.5" />
                         <span className="sr-only">Open external link</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
                         onClick={(e) => {
                           e.stopPropagation();
                           // TODO: Implement flag functionality
                         }}
                         title="Flag for attention"
                       >
-                        <Flag className="h-4 w-4" />
+                        <Flag className="h-3.5 w-3.5" />
                         <span className="sr-only">Flag</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
                         onClick={(e) => {
                           e.stopPropagation();
                           // TODO: Implement mark as reviewed functionality
                         }}
                         title="Mark as reviewed"
                       >
-                        <Check className="h-4 w-4" />
+                        <Check className="h-3.5 w-3.5" />
                         <span className="sr-only">Mark as reviewed</span>
                       </Button>
                     </div>

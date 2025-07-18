@@ -10,22 +10,20 @@ export function Footer() {
           </div>
           <div className="flex items-center space-x-6 text-sm">
             <Link
-              href="/terms"
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Terms of Service
-            </Link>
-            <Link
-              href="/privacy"
+              href="https://www.lgradar.com.au/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               Privacy Policy
             </Link>
             <Link
-              href="/contact"
+              href="https://www.lgradar.com.au/contact"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              Support
+              Contact
             </Link>
           </div>
         </div>
