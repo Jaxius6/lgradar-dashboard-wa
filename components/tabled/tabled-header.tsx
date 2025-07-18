@@ -32,7 +32,9 @@ export function TabledHeader({
     async function fetchTypes() {
       setTypesLoading(true);
       const { data } = await getTabledItemTypes();
-      setAvailableTypes(data as string[]);
+      // Sort types alphabetically
+      const sortedTypes = (data as string[]).sort((a, b) => a.localeCompare(b));
+      setAvailableTypes(sortedTypes);
       setTypesLoading(false);
     }
     
@@ -83,7 +85,7 @@ export function TabledHeader({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search tabled items"
+              placeholder="Search tabled papers"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-10 pr-10 h-9"
@@ -129,7 +131,7 @@ export function TabledHeader({
           <div className="relative flex-1 min-w-0 sm:min-w-[250px] lg:min-w-[300px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search tabled items"
+              placeholder="Search tabled papers"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-10 pr-10"
@@ -166,37 +168,35 @@ export function TabledHeader({
         </div>
       </div>
 
-      {/* Filters - Collapsible */}
-      <div className="bg-muted/50 rounded-lg overflow-hidden">
-        <div className="p-4">
-          <div className="flex items-center justify-between">
+      {/* Filters - Compact */}
+      <div className="bg-muted/30 rounded-lg overflow-hidden">
+        <div className="p-3">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium">Filter by Type</h3>
+              <h3 className="font-medium text-sm">Filter by Type</h3>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className="h-6 w-6 p-0"
+                className="h-5 w-5 p-0"
               >
                 {isFilterOpen ? (
-                  <ChevronUp className="h-4 w-4" />
+                  <ChevronUp className="h-3 w-3" />
                 ) : (
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-3 w-3" />
                 )}
               </Button>
             </div>
             {(selectedTypes.length > 0 || searchQuery) && (
-              <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+              <Button variant="ghost" size="sm" onClick={clearAllFilters} className="text-xs h-6">
                 Clear all
               </Button>
             )}
           </div>
-        </div>
-        {isFilterOpen && (
-          <div className="px-4 pb-4">
-            <div className="flex flex-wrap gap-2">
+          {isFilterOpen && (
+            <div className="flex flex-wrap gap-1.5">
               {typesLoading ? (
-                <div className="text-sm text-muted-foreground">Loading types...</div>
+                <div className="text-xs text-muted-foreground">Loading types...</div>
               ) : (
                 availableTypes.map((type) => (
                   <Button
@@ -204,14 +204,15 @@ export function TabledHeader({
                     variant={selectedTypes.includes(type) ? "default" : "outline"}
                     size="sm"
                     onClick={() => toggleType(type)}
+                    className="h-7 text-xs px-2"
                   >
                     {type}
                   </Button>
                 ))
               )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

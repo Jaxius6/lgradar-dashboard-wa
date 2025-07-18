@@ -1,188 +1,207 @@
+'use client';
+
 export const dynamic = 'force-dynamic';
 
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, Download, Calendar, DollarSign } from 'lucide-react';
+import { Check, CreditCard, Calendar, DollarSign, ArrowRight } from 'lucide-react';
+import { getStripe, PRICING_PLANS } from '@/lib/stripe';
 
-export default function BillingPage() {
+export default function PricingPage() {
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleSubscribe = async (plan: 'monthly' | 'yearly') => {
+    try {
+      setLoading(plan);
+      
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ plan }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
+      }
+
+      const { sessionId } = await response.json();
+      
+      const stripe = await getStripe();
+      if (stripe && sessionId) {
+        await stripe.redirectToCheckout({ sessionId });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Billing</h1>
-        <p className="text-muted-foreground">
-          Manage your subscription and billing information
+      <div className="text-center space-y-4">
+        <h1 className="text-3xl font-bold tracking-tight">Choose Your Plan</h1>
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          Get unlimited access to WA legislative tracking. Never miss a Gazette again.
         </p>
       </div>
 
-      {/* Current Plan */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Current Plan</span>
-            <Badge variant="brand">Pro</Badge>
-          </CardTitle>
-          <CardDescription>
-            Your current subscription details and usage
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 border rounded-lg">
-              <DollarSign className="h-8 w-8 mx-auto mb-2 text-brand-500" />
-              <p className="text-2xl font-bold">$197</p>
-              <p className="text-sm text-muted-foreground">per month</p>
+      {/* Pricing Plans */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Monthly Plan */}
+        <Card className="relative">
+          <CardHeader className="text-center pb-8">
+            <CardTitle className="text-xl">Monthly</CardTitle>
+            <div className="mt-4">
+              <span className="text-4xl font-bold">${PRICING_PLANS.monthly.price}</span>
+              <span className="text-muted-foreground">/month</span>
             </div>
-            
-            <div className="text-center p-4 border rounded-lg">
-              <Calendar className="h-8 w-8 mx-auto mb-2 text-blue-500" />
-              <p className="text-2xl font-bold">15</p>
-              <p className="text-sm text-muted-foreground">days remaining</p>
-            </div>
-            
-            <div className="text-center p-4 border rounded-lg">
-              <CreditCard className="h-8 w-8 mx-auto mb-2 text-green-500" />
-              <p className="text-2xl font-bold">5</p>
-              <p className="text-sm text-muted-foreground">team members</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between pt-4 border-t">
-            <div>
-              <p className="font-medium">Next billing date</p>
-              <p className="text-sm text-muted-foreground">January 19, 2025</p>
-            </div>
-            <div className="space-x-2">
-              <Button variant="outline">Change Plan</Button>
-              <Button>Manage Billing</Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            <CardDescription className="mt-2">
+              Perfect for getting started
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <ul className="space-y-3">
+              {[
+                'Unlimited gazette access',
+                'Real-time notifications',
+                'Advanced search & filters',
+                'Export capabilities',
+                'Email support'
+              ].map((feature, index) => (
+                <li key={index} className="flex items-center space-x-3">
+                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <Button
+              className="w-full"
+              onClick={() => handleSubscribe('monthly')}
+              disabled={loading === 'monthly'}
+            >
+              {loading === 'monthly' ? (
+                'Redirecting to Stripe...'
+              ) : (
+                <>
+                  Start Monthly Plan
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
 
-      {/* Stripe Customer Portal */}
+        {/* Yearly Plan */}
+        <Card className="relative border-primary">
+          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+            <Badge className="bg-primary text-primary-foreground">Most Popular</Badge>
+          </div>
+          <CardHeader className="text-center pb-8">
+            <CardTitle className="text-xl">Yearly</CardTitle>
+            <div className="mt-4">
+              <span className="text-4xl font-bold">${Math.round(PRICING_PLANS.yearly.price / 12)}</span>
+              <span className="text-muted-foreground">/month</span>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Billed annually (${PRICING_PLANS.yearly.price})
+            </div>
+            <CardDescription className="mt-2">
+              Save 2 months with yearly billing
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <ul className="space-y-3">
+              {[
+                'Everything in Monthly',
+                'Priority support',
+                'Advanced analytics',
+                'Team collaboration (up to 5 users)',
+                'Custom integrations',
+                '2 months free'
+              ].map((feature, index) => (
+                <li key={index} className="flex items-center space-x-3">
+                  <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+                  <span className="text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+            <Button
+              className="w-full"
+              onClick={() => handleSubscribe('yearly')}
+              disabled={loading === 'yearly'}
+            >
+              {loading === 'yearly' ? (
+                'Redirecting to Stripe...'
+              ) : (
+                <>
+                  Start Yearly Plan
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Features */}
       <Card>
         <CardHeader>
-          <CardTitle>Billing Management</CardTitle>
+          <CardTitle>Why Choose LG Radar?</CardTitle>
           <CardDescription>
-            Access your complete billing history and manage payment methods
+            Comprehensive legislative tracking for WA councils
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Use the Stripe customer portal to update your payment method, download invoices, 
-              and manage your subscription settings.
-            </p>
-            
-            {/* Placeholder for Stripe Customer Portal iframe */}
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-              <CreditCard className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-medium mb-2">Stripe Customer Portal</h3>
-              <p className="text-muted-foreground mb-4">
-                The Stripe customer portal will be embedded here in production
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center space-y-2">
+              <Calendar className="h-8 w-8 mx-auto text-primary" />
+              <h3 className="font-medium">Real-time Updates</h3>
+              <p className="text-sm text-muted-foreground">
+                Get notified the moment new gazettes are published
               </p>
-              <Button>Open Billing Portal</Button>
+            </div>
+            <div className="text-center space-y-2">
+              <CreditCard className="h-8 w-8 mx-auto text-primary" />
+              <h3 className="font-medium">Secure & Reliable</h3>
+              <p className="text-sm text-muted-foreground">
+                Enterprise-grade security with 99.9% uptime
+              </p>
+            </div>
+            <div className="text-center space-y-2">
+              <DollarSign className="h-8 w-8 mx-auto text-primary" />
+              <h3 className="font-medium">Great Value</h3>
+              <p className="text-sm text-muted-foreground">
+                Comprehensive tracking at an affordable price
+              </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Recent Invoices */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Invoices</CardTitle>
-          <CardDescription>
-            Your recent billing history and downloadable invoices
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[
-              { date: '2025-01-01', amount: '$99.00', status: 'Paid', invoice: 'INV-2025-001' },
-              { date: '2024-12-01', amount: '$99.00', status: 'Paid', invoice: 'INV-2024-012' },
-              { date: '2024-11-01', amount: '$99.00', status: 'Paid', invoice: 'INV-2024-011' },
-              { date: '2024-10-01', amount: '$99.00', status: 'Paid', invoice: 'INV-2024-010' },
-            ].map((invoice, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div>
-                    <p className="font-medium">{invoice.invoice}</p>
-                    <p className="text-sm text-muted-foreground">{invoice.date}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <p className="font-medium">{invoice.amount}</p>
-                    <Badge variant={invoice.status === 'Paid' ? 'default' : 'secondary'}>
-                      {invoice.status}
-                    </Badge>
-                  </div>
-                  
-                  <Button variant="ghost" size="icon">
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+      {/* Trust indicators */}
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center space-x-6 text-sm text-muted-foreground">
+          <div className="flex items-center space-x-2">
+            <CreditCard className="h-4 w-4" />
+            <span>Secure payments via Stripe</span>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Usage Statistics */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Usage This Month</CardTitle>
-          <CardDescription>
-            Track your usage against plan limits
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Gazette Views</span>
-                <span>1,247 / 5,000</span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div className="bg-brand-500 h-2 rounded-full" style={{ width: '25%' }}></div>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>API Calls</span>
-                <span>3,456 / 10,000</span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div className="bg-blue-500 h-2 rounded-full" style={{ width: '35%' }}></div>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Exports</span>
-                <span>23 / 100</span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div className="bg-green-500 h-2 rounded-full" style={{ width: '23%' }}></div>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Team Members</span>
-                <span>1 / 5</span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div className="bg-purple-500 h-2 rounded-full" style={{ width: '20%' }}></div>
-              </div>
-            </div>
+          <div className="flex items-center space-x-2">
+            <Check className="h-4 w-4" />
+            <span>Cancel anytime</span>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-center space-x-2">
+            <DollarSign className="h-4 w-4" />
+            <span>14-day money-back guarantee</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -186,8 +186,8 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
       <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">
+            <TableRow className="h-10">
+              <TableHead className="w-[90px] py-2">
                 <SortableHeader
                   sortKey="date"
                   currentSort={sortConfig}
@@ -196,7 +196,7 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
                   Date
                 </SortableHeader>
               </TableHead>
-              <TableHead className="w-[150px]">
+              <TableHead className="w-[120px] py-2">
                 <SortableHeader
                   sortKey="type"
                   currentSort={sortConfig}
@@ -205,7 +205,7 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
                   Type
                 </SortableHeader>
               </TableHead>
-              <TableHead>
+              <TableHead className="py-2">
                 <SortableHeader
                   sortKey="name"
                   currentSort={sortConfig}
@@ -214,7 +214,7 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
                   Name
                 </SortableHeader>
               </TableHead>
-              <TableHead className="w-[120px]">
+              <TableHead className="w-[100px] py-2">
                 <SortableHeader
                   sortKey="paper_no"
                   currentSort={sortConfig}
@@ -223,7 +223,7 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
                   Paper No.
                 </SortableHeader>
               </TableHead>
-              <TableHead className="w-[120px]">Actions</TableHead>
+              <TableHead className="w-[110px] py-2">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -231,68 +231,68 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
               return (
                 <TableRow
                   key={item.id}
-                  className="data-table-row cursor-pointer hover:bg-muted/50"
+                  className="data-table-row cursor-pointer hover:bg-muted/50 h-12"
                   onClick={() => handleRowClick(item)}
                 >
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium text-xs py-2">
                     {item.date ? formatDate(item.date, 'MMM dd') : 'N/A'}
                   </TableCell>
-                  <TableCell>
-                    <span className={`font-medium text-sm ${getTypeColor(item.type || 'Unknown')}`}>
+                  <TableCell className="py-2">
+                    <span className={`font-medium text-xs ${getTypeColor(item.type || 'Unknown')}`}>
                       {item.type || 'Unknown'}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <div className="max-w-md">
-                      <p className="font-medium leading-tight line-clamp-2 text-sm">
+                      <p className="font-medium leading-tight line-clamp-2 text-xs">
                         {item.name || 'Untitled'}
                       </p>
                     </div>
                   </TableCell>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium text-xs py-2">
                     {item.paper_no || 'N/A'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <div className="flex items-center gap-0.5">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7"
+                        className="h-6 w-6"
                         onClick={(e) => handleViewDetails(item, e)}
                         title="View details"
                       >
-                        <Eye className="h-3.5 w-3.5" />
+                        <Eye className="h-3 w-3" />
                         <span className="sr-only">View details</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7"
+                        className="h-6 w-6"
                         onClick={(e) => handleExternalLink(item, e)}
                         disabled={!item.url && !item.link}
                         title="Open in new tab"
                       >
-                        <ExternalLinkIcon className="h-3.5 w-3.5" />
+                        <ExternalLinkIcon className="h-3 w-3" />
                         <span className="sr-only">Open external link</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={`h-7 w-7 ${item.is_flagged ? 'text-red-500' : ''}`}
+                        className={`h-6 w-6 ${item.is_flagged ? 'text-red-500' : ''}`}
                         onClick={(e) => handleFlag(item, e)}
                         title="Flag for attention"
                       >
-                        <Flag className="h-3.5 w-3.5" />
+                        <Flag className="h-3 w-3" />
                         <span className="sr-only">Flag</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={`h-7 w-7 ${item.is_reviewed ? 'text-green-500' : ''}`}
+                        className={`h-6 w-6 ${item.is_reviewed ? 'text-green-500' : ''}`}
                         onClick={(e) => handleReview(item, e)}
                         title="Mark as reviewed"
                       >
-                        <Check className="h-3.5 w-3.5" />
+                        <Check className="h-3 w-3" />
                         <span className="sr-only">Mark as reviewed</span>
                       </Button>
                     </div>

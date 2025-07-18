@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 import {
   FileText,
   Bell,
@@ -28,7 +27,6 @@ const navigation = [
   { name: 'Tabled', href: '/tabled', icon: Table },
   { name: 'Alerts', href: '/alerts', icon: Bell },
   { name: 'Logs', href: '/logs', icon: Activity },
-  { name: 'Billing', href: '/billing', icon: CreditCard },
   { name: 'Contact', href: 'https://www.lgradar.com.au/contact', icon: Mail, external: true },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
@@ -77,9 +75,9 @@ export function Sidebar({ className }: SidebarProps) {
           // Mobile behavior
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           // Desktop width based on collapsed state
-          isCollapsed ? 'lg:w-16' : 'lg:w-64',
+          isCollapsed ? 'lg:w-16' : 'lg:w-56',
           // Mobile always full width when open
-          'w-64',
+          'w-56',
           className
         )}
       >
@@ -113,12 +111,11 @@ export function Sidebar({ className }: SidebarProps) {
                     height={32}
                     className="w-8 h-8"
                   />
-                  <span className="font-semibold text-lg">Radar</span>
+                  <span className="font-semibold text-lg">LG Radar</span>
                 </Link>
                 
-                {/* Desktop controls */}
-                <div className="hidden lg:flex items-center space-x-1">
-                  <ThemeToggle />
+                {/* Desktop collapse button */}
+                <div className="hidden lg:block">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -233,7 +230,7 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Main content spacer for desktop */}
       <div className={cn(
         "hidden lg:block flex-shrink-0",
-        isCollapsed ? "w-16" : "w-64"
+        isCollapsed ? "w-16" : "w-56"
       )} />
     </>
   );
