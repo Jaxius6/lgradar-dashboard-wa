@@ -111,7 +111,6 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
               <TableHead>Title</TableHead>
               <TableHead className="w-[150px]">Jurisdiction</TableHead>
               <TableHead className="w-[100px]">Category</TableHead>
-              <TableHead className="w-[100px]">Risk</TableHead>
               <TableHead className="w-[100px]">Effective</TableHead>
               <TableHead className="w-[120px]">Disallowance</TableHead>
               <TableHead className="w-[120px]">Actions</TableHead>
@@ -132,11 +131,11 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                     {gazette.pubdate ? formatDate(gazette.pubdate, 'MMM dd') : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 max-w-md">
                       {gazette.emoji && (
-                        <span className="text-lg">{gazette.emoji}</span>
+                        <span className="text-lg flex-shrink-0">{gazette.emoji}</span>
                       )}
-                      <p className="font-medium leading-none">
+                      <p className="font-medium leading-tight line-clamp-2 text-sm">
                         {gazette.title || 'Untitled'}
                       </p>
                     </div>
@@ -149,11 +148,6 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                   <TableCell>
                     <Badge variant="outline" className="text-xs">
                       {gazette.category || 'General'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={getRiskBadgeVariant(riskRating)}>
-                      {riskRating}
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">

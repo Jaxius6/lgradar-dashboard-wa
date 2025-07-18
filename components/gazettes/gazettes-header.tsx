@@ -54,9 +54,9 @@ export function GazettesHeader({ searchQuery, onSearchChange, onRefresh }: Gazet
     <div className="space-y-6">
       {/* Page title and actions */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        <div className="space-y-2">
+        <div className="space-y-1">
           <h1 className="text-4xl font-bold tracking-tight">Gazettes</h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-sm">
             Track legislative changes and never miss a critical deadline
           </p>
         </div>
@@ -66,7 +66,7 @@ export function GazettesHeader({ searchQuery, onSearchChange, onRefresh }: Gazet
           <div className="relative flex-1 min-w-[300px]">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search gazettes by title, jurisdiction, or category..."
+              placeholder="Search gazettes"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="pl-10 pr-10"
