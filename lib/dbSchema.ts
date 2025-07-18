@@ -51,6 +51,21 @@ export const GazetteSchema = z.object({
   numpages: z.number().nullable(),
   author: z.string().nullable(),
   next_sit: z.string().nullable(),
+  is_flagged: z.boolean().default(false),
+  is_reviewed: z.boolean().default(false),
+});
+
+// Tabled schema - matches the actual Supabase table structure
+export const TabledSchema = z.object({
+  id: z.number(),
+  date: z.string().nullable(),
+  type: z.string().nullable(),
+  name: z.string().nullable(),
+  paper_no: z.string().nullable(),
+  link: z.string().nullable(),
+  created_at: z.string().nullable(),
+  is_flagged: z.boolean().default(false),
+  is_reviewed: z.boolean().default(false),
 });
 
 // Legacy Gazette schema for backwards compatibility
@@ -176,6 +191,7 @@ export const ContactFormSchema = z.object({
 export type Organisation = z.infer<typeof OrganisationSchema>;
 export type Profile = z.infer<typeof ProfileSchema>;
 export type Gazette = z.infer<typeof GazetteSchema>;
+export type Tabled = z.infer<typeof TabledSchema>;
 export type LegacyGazette = z.infer<typeof LegacyGazetteSchema>;
 export type Alert = z.infer<typeof AlertSchema>;
 export type ActivityLog = z.infer<typeof ActivityLogSchema>;

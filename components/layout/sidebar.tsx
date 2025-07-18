@@ -15,11 +15,13 @@ import {
   Menu,
   X,
   LogOut,
+  Table,
 } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 
 const navigation = [
   { name: 'Gazettes', href: '/gazettes', icon: FileText },
+  { name: 'Tabled', href: '/tabled', icon: Table },
   { name: 'Alerts', href: '/alerts', icon: Bell },
   { name: 'Logs', href: '/logs', icon: Activity },
   { name: 'Billing', href: '/billing', icon: CreditCard },

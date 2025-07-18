@@ -199,10 +199,16 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7"
+                        className={`h-7 w-7 ${gazette.is_flagged ? 'text-red-500' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: Implement flag functionality
+                          // Toggle flag state optimistically
+                          const newFlaggedState = !gazette.is_flagged;
+                          setGazettes(prev => prev.map(g =>
+                            g.id === gazette.id ? { ...g, is_flagged: newFlaggedState } : g
+                          ));
+                          // TODO: Call API to update database
+                          console.log(`Flagging gazette ${gazette.id}: ${newFlaggedState}`);
                         }}
                         title="Flag for attention"
                       >
@@ -212,10 +218,16 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7"
+                        className={`h-7 w-7 ${gazette.is_reviewed ? 'text-green-500' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: Implement mark as reviewed functionality
+                          // Toggle review state optimistically
+                          const newReviewedState = !gazette.is_reviewed;
+                          setGazettes(prev => prev.map(g =>
+                            g.id === gazette.id ? { ...g, is_reviewed: newReviewedState } : g
+                          ));
+                          // TODO: Call API to update database
+                          console.log(`Reviewing gazette ${gazette.id}: ${newReviewedState}`);
                         }}
                         title="Mark as reviewed"
                       >

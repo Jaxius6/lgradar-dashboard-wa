@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate, getRiskBadgeVariant } from '@/lib/utils';
-import { X, ExternalLink, Clock, Calendar, Building, FileText, Hash, User } from 'lucide-react';
+import { X, ExternalLink, Clock, Calendar, Building, FileText, Hash, User, Flag, Check } from 'lucide-react';
 import { Gazette } from '@/lib/dbSchema';
 import { calculateRiskRating, isGazetteRelevant, getDaysUntilNextSitting } from '@/lib/gazette-utils';
 
@@ -67,9 +67,18 @@ export function GazetteDetailDrawer({ gazette, open, onOpenChange }: GazetteDeta
 
           {/* Status badges */}
           <div className="flex items-center space-x-2">
-            <Badge variant={getRiskBadgeVariant(riskRating)}>
-              {riskRating} risk
-            </Badge>
+            {gazette.is_flagged && (
+              <Badge variant="destructive" className="text-xs">
+                <Flag className="h-3 w-3 mr-1" />
+                Flagged
+              </Badge>
+            )}
+            {gazette.is_reviewed && (
+              <Badge variant="default" className="text-xs bg-green-600">
+                <Check className="h-3 w-3 mr-1" />
+                Reviewed
+              </Badge>
+            )}
             {isRelevant && (
               <Badge variant="default">Relevant</Badge>
             )}
