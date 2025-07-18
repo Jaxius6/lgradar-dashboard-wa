@@ -113,8 +113,10 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
 
   const handleExternalLink = (item: Tabled, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (item.link) {
-      window.open(item.link, '_blank');
+    // Use 'url' column if it exists, otherwise fall back to 'link'
+    const linkUrl = item.url || item.link;
+    if (linkUrl) {
+      window.open(linkUrl, '_blank');
     }
   };
 
@@ -181,7 +183,7 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
 
   return (
     <>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -267,7 +269,7 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
                         size="icon"
                         className="h-7 w-7"
                         onClick={(e) => handleExternalLink(item, e)}
-                        disabled={!item.link}
+                        disabled={!item.url && !item.link}
                         title="Open in new tab"
                       >
                         <ExternalLinkIcon className="h-3.5 w-3.5" />

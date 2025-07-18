@@ -33,8 +33,10 @@ export function TabledDetailDrawer({ item, open, onOpenChange }: TabledDetailDra
   };
 
   const handleOpenLink = () => {
-    if (item.link) {
-      window.open(item.link, '_blank');
+    // Use 'url' column if it exists, otherwise fall back to 'link'
+    const linkUrl = item.url || item.link;
+    if (linkUrl) {
+      window.open(linkUrl, '_blank');
     }
   };
 
@@ -130,14 +132,14 @@ export function TabledDetailDrawer({ item, open, onOpenChange }: TabledDetailDra
             </h3>
             
             <div className="flex flex-col space-y-2">
-              {item.link && (
+              {(item.url || item.link) && (
                 <Button
                   variant="outline"
                   onClick={handleOpenLink}
                   className="justify-start"
                 >
                   <ExternalLinkIcon className="h-4 w-4 mr-2" />
-                  Open Document
+                  Open Document in New Tab
                 </Button>
               )}
               

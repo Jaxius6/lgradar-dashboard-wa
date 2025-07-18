@@ -63,6 +63,7 @@ export const TabledSchema = z.object({
   name: z.string().nullable(),
   paper_no: z.string().nullable(),
   link: z.string().nullable(),
+  url: z.string().nullable(), // Check if this column exists
   created_at: z.string().nullable(),
   is_flagged: z.boolean().default(false),
   is_reviewed: z.boolean().default(false),
