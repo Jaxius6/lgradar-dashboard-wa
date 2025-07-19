@@ -66,15 +66,37 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         }
       }
       
-      // Query the subscriptions table directly
-      const { data, error } = await supabase
+      // First try the 'subscriptions' table
+      let { data, error } = await supabase
         .from('subscriptions')
         .select('id, plan, status, current_period_start, current_period_end')
         .eq('user_id', user.id)
-        .eq('status', 'active')
+        .in('status', ['active', 'trialing', 'past_due'])
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
+
+      // If no data found in 'subscriptions', try 'user_subscriptions' table
+      if (error?.code === 'PGRST116' || !data) {
+        console.log('No data in subscriptions table, trying user_subscriptions...');
+        const { data: userData, error: userError } = await supabase
+          .from('user_subscriptions')
+          .select('id, plan, status, current_period_start, current_period_end')
+          .eq('user_id', user.id)
+          .in('status', ['active', 'trialing', 'past_due'])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        data = userData;
+        error = userError;
+        
+        if (userData) {
+          console.log('Found subscription in user_subscriptions table:', userData);
+        }
+      } else if (data) {
+        console.log('Found subscription in subscriptions table:', data);
+      }
 
       if (error) {
         if (error.code === 'PGRST116') {
@@ -106,8 +128,9 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     fetchSubscription();
   }, [user]);
 
-  const hasActiveSubscription = (subscription?.status === 'active' &&
-    new Date(subscription.current_period_end) > new Date()) || hasTemporaryAccess;
+  const hasActiveSubscription = (subscription &&
+    ['active', 'trialing', 'past_due'].includes(subscription.status) &&
+    (subscription.current_period_end === null || new Date(subscription.current_period_end) > new Date())) || hasTemporaryAccess;
 
   const refetch = () => {
     fetchSubscription();

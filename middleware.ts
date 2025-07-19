@@ -4,10 +4,6 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
   try {
-    // TEMPORARY: Disable authentication for testing
-    console.log('Middleware: Authentication disabled for testing - allowing all requests');
-    return NextResponse.next();
-
     // Check if Supabase environment variables are available
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
