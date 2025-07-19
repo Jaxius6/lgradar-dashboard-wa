@@ -1,9 +1,14 @@
+'use client';
+
 export const dynamic = 'force-dynamic';
 
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { WelcomePopup } from '@/components/ui/welcome-popup';
 import { Plus, Bell, Mail, Trash2, Edit } from 'lucide-react';
 
 // Mock data
@@ -41,8 +46,40 @@ const mockAlerts = [
 ];
 
 export default function AlertsPage() {
+  const searchParams = useSearchParams();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    // Check if user just completed payment
+    const success = searchParams.get('success');
+    const sessionId = searchParams.get('session_id');
+    
+    if (success === 'true' && sessionId) {
+      setShowWelcome(true);
+      
+      // Grant temporary access while webhook processes
+      sessionStorage.setItem('stripe_payment_success', JSON.stringify({
+        timestamp: new Date().toISOString(),
+        sessionId: sessionId,
+        plan: 'monthly' // Default, will be updated by webhook
+      }));
+      
+      // Clean up URL parameters
+      const url = new URL(window.location.href);
+      url.searchParams.delete('success');
+      url.searchParams.delete('session_id');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [searchParams]);
+
   return (
-    <div className="space-y-6">
+    <>
+      <WelcomePopup
+        isOpen={showWelcome}
+        onClose={() => setShowWelcome(false)}
+      />
+      
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -195,6 +232,7 @@ export default function AlertsPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }

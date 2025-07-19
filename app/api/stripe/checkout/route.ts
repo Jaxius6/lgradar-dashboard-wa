@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: 'subscription',
-      success_url: `${request.nextUrl.origin}/settings?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${request.nextUrl.origin}/alerts?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.nextUrl.origin}/settings?canceled=true`,
       metadata: {
         user_id: user.id,
