@@ -55,7 +55,14 @@ export default function AlertsPage() {
     const sessionId = searchParams.get('session_id');
     
     if (success === 'true' && sessionId) {
-      setShowWelcome(true);
+      // Check if welcome popup has been shown before
+      const hasSeenWelcome = localStorage.getItem('lg_radar_welcome_shown');
+      
+      if (!hasSeenWelcome) {
+        setShowWelcome(true);
+        // Mark welcome as shown
+        localStorage.setItem('lg_radar_welcome_shown', 'true');
+      }
       
       // Grant temporary access while webhook processes
       sessionStorage.setItem('stripe_payment_success', JSON.stringify({
