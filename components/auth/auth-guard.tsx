@@ -11,10 +11,6 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children, fallback }: AuthGuardProps) {
-  // TEMPORARY: Disable authentication for testing
-  console.log('AuthGuard: Authentication disabled for testing - allowing access');
-  return <>{children}</>;
-
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [supabase, setSupabase] = useState<any>(null);

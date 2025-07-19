@@ -114,6 +114,20 @@ export const ActivityLogSchema = BaseSchema.extend({
   organisation_id: z.string().uuid(),
 });
 
+// User subscription schema
+export const UserSubscriptionSchema = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  stripe_customer_id: z.string().optional(),
+  stripe_subscription_id: z.string().optional(),
+  plan: z.enum(['monthly', 'yearly']),
+  status: z.enum(['active', 'cancelled', 'past_due', 'incomplete']),
+  current_period_start: z.string().datetime().optional(),
+  current_period_end: z.string().datetime().optional(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+});
+
 // Team invitation schema
 export const TeamInvitationSchema = BaseSchema.extend({
   email: z.string().email(),
@@ -196,6 +210,7 @@ export type Tabled = z.infer<typeof TabledSchema>;
 export type LegacyGazette = z.infer<typeof LegacyGazetteSchema>;
 export type Alert = z.infer<typeof AlertSchema>;
 export type ActivityLog = z.infer<typeof ActivityLogSchema>;
+export type UserSubscription = z.infer<typeof UserSubscriptionSchema>;
 export type TeamInvitation = z.infer<typeof TeamInvitationSchema>;
 export type Pagination = z.infer<typeof PaginationSchema>;
 export type ApiResponse = z.infer<typeof ApiResponseSchema>;

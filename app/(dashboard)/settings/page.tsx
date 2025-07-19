@@ -25,8 +25,19 @@ export default function SettingsPage() {
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Implement profile update with Supabase
-    setTimeout(() => setIsLoading(false), 1000);
+    
+    try {
+      // TODO: Implement profile update with Supabase
+      // For now, just simulate the update
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Here you would update the user profile in Supabase
+      console.log('Profile update would be implemented here');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleManageSubscription = async () => {
@@ -40,10 +51,59 @@ export default function SettingsPage() {
         },
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create portal session');
+      }
+
       const { url } = await response.json();
-      window.open(url, '_blank');
+      
+      if (url) {
+        window.open(url, '_blank');
+      } else {
+        throw new Error('No portal URL received');
+      }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error managing subscription:', error);
+      // You could show a toast notification here
+      alert('Failed to open billing portal. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubscribe = async (plan: 'monthly' | 'yearly') => {
+    try {
+      setIsLoading(true);
+      
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ plan }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create checkout session');
+      }
+
+      const { sessionId } = await response.json();
+      
+      // Redirect to Stripe Checkout
+      const stripe = await import('@stripe/stripe-js').then(mod =>
+        mod.loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+      );
+      
+      if (stripe) {
+        await stripe.redirectToCheckout({ sessionId });
+      } else {
+        throw new Error('Failed to load Stripe');
+      }
+    } catch (error) {
+      console.error('Error starting subscription:', error);
+      alert('Failed to start subscription. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -202,9 +262,24 @@ export default function SettingsPage() {
                         You don't have an active subscription yet
                       </p>
                     </div>
-                    <Button variant="outline" size="sm">
-                      View Plans
-                    </Button>
+                    <div className="flex gap-2 justify-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSubscribe('monthly')}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Loading...' : 'Monthly Plan'}
+                      </Button>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleSubscribe('yearly')}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? 'Loading...' : 'Yearly Plan (Save 2 months)'}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </CardContent>

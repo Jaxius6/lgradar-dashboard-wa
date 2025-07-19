@@ -37,16 +37,26 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     try {
       setLoading(true);
       
-      // Call the Supabase function to get user subscription
-      const { data, error } = await supabase.rpc('get_user_subscription', {
-        user_uuid: user.id
-      });
+      // Query the subscriptions table directly
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('id, plan, status, current_period_start, current_period_end')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
 
       if (error) {
-        console.error('Error fetching subscription:', error);
-        setSubscription(null);
-      } else if (data && data.length > 0) {
-        setSubscription(data[0]);
+        if (error.code === 'PGRST116') {
+          // No rows returned - user has no active subscription
+          setSubscription(null);
+        } else {
+          console.error('Error fetching subscription:', error);
+          setSubscription(null);
+        }
+      } else if (data) {
+        setSubscription(data);
       } else {
         setSubscription(null);
       }

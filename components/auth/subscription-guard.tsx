@@ -13,10 +13,6 @@ interface SubscriptionGuardProps {
 }
 
 export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
-  // TEMPORARY: Disable subscription guard for testing
-  console.log('SubscriptionGuard: Subscription check disabled for testing - allowing access');
-  return <>{children}</>;
-
   const { hasActiveSubscription, loading, subscription } = useSubscription();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
