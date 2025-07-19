@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,17 +9,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 503 });
     }
 
-    // Create regular client for auth
-    const authSupabase = createClient(
+    // Create server client for auth with cookies
+    const cookieStore = cookies();
+    const authSupabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+        },
+      }
     );
     
     // Create service role client for database operations
-    const supabase = createClient(
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
+        cookies: {
+          get() { return undefined },
+        },
         auth: {
           autoRefreshToken: false,
           persistSession: false
@@ -26,12 +38,15 @@ export async function GET(request: NextRequest) {
       }
     );
     
-    // Get the authenticated user
-    const { data: { user }, error: authError } = await authSupabase.auth.getUser();
+    // Get the authenticated user from session
+    const { data: { session }, error: authError } = await authSupabase.auth.getSession();
     
-    if (authError || !user) {
+    if (authError || !session?.user) {
+      console.log('🚫 Auth failed:', authError?.message || 'No session');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const user = session.user;
 
     console.log('🔄 Manual sync started for user:', user.id);
 
