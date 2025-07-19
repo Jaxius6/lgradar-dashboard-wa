@@ -1,10 +1,11 @@
 'use client';
 
 import { useSubscription } from '@/hooks/use-subscription';
+import { useUser } from '@/hooks/use-user';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, CreditCard, Lock } from 'lucide-react';
+import { Check, CreditCard, Lock, LogOut, User } from 'lucide-react';
 import { getStripe, PRICING_PLANS } from '@/lib/stripe';
 import { useState } from 'react';
 
@@ -14,6 +15,7 @@ interface SubscriptionGuardProps {
 
 export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
   const { hasActiveSubscription, loading, subscription } = useSubscription();
+  const { user, signOut } = useUser();
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
   const handleSubscribe = async (plan: 'monthly' | 'yearly') => {
@@ -150,6 +152,34 @@ export function SubscriptionGuard({ children }: SubscriptionGuardProps) {
             </CardContent>
           </Card>
         </div>
+
+        {/* User Info - Compact */}
+        {user && (
+          <div className="text-center">
+            <div className="inline-flex items-center space-x-4 px-4 py-2 bg-muted rounded-lg text-sm">
+              <span className="text-muted-foreground">Logged in as <strong>{user.email}</strong></span>
+              <div className="flex space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={signOut}
+                  className="h-6 px-2 text-xs"
+                >
+                  Switch Account
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={signOut}
+                  className="h-6 px-2 text-xs"
+                >
+                  <LogOut className="h-3 w-3 mr-1" />
+                  Logout
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Trust indicators */}
         <div className="text-center space-y-4">

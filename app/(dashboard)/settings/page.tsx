@@ -20,6 +20,9 @@ export default function SettingsPage() {
   const [profileData, setProfileData] = useState({
     fullName: user?.user_metadata?.full_name || '',
     email: user?.email || '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   });
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
@@ -35,6 +38,45 @@ export default function SettingsPage() {
       console.log('Profile update would be implemented here');
     } catch (error) {
       console.error('Error updating profile:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      if (profileData.newPassword !== profileData.confirmPassword) {
+        alert('New passwords do not match');
+        return;
+      }
+      
+      if (profileData.newPassword.length < 6) {
+        alert('Password must be at least 6 characters long');
+        return;
+      }
+      
+      // TODO: Implement password update with Supabase
+      // For now, just simulate the update
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Here you would update the password in Supabase
+      console.log('Password update would be implemented here');
+      
+      // Clear password fields
+      setProfileData(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }));
+      
+      alert('Password updated successfully');
+    } catch (error) {
+      console.error('Error updating password:', error);
+      alert('Failed to update password');
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +155,6 @@ export default function SettingsPage() {
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'billing', label: 'Billing', icon: CreditCard },
     { id: 'appearance', label: 'Appearance', icon: Palette },
-    { id: 'security', label: 'Security', icon: Shield },
     { id: 'team', label: 'Team', icon: Users },
   ];
 
@@ -190,6 +231,54 @@ export default function SettingsPage() {
                     {isLoading ? 'Updating...' : 'Update Profile'}
                   </Button>
                 </form>
+
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-medium mb-4">Change Password</h3>
+                  <form onSubmit={handlePasswordChange} className="space-y-4">
+                    <div className="space-y-2">
+                      <label htmlFor="currentPassword" className="text-sm font-medium">
+                        Current Password
+                      </label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        value={profileData.currentPassword}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                        placeholder="Enter your current password"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label htmlFor="newPassword" className="text-sm font-medium">
+                        New Password
+                      </label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        value={profileData.newPassword}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, newPassword: e.target.value }))}
+                        placeholder="Enter your new password"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label htmlFor="confirmPassword" className="text-sm font-medium">
+                        Confirm New Password
+                      </label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={profileData.confirmPassword}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        placeholder="Confirm your new password"
+                      />
+                    </div>
+
+                    <Button type="submit" disabled={isLoading} variant="outline">
+                      {isLoading ? 'Updating...' : 'Change Password'}
+                    </Button>
+                  </form>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -231,26 +320,6 @@ export default function SettingsPage() {
                         <span>{isLoading ? 'Loading...' : 'Manage'}</span>
                         <ExternalLink className="h-4 w-4" />
                       </Button>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Status</p>
-                        <p className="text-sm font-semibold capitalize text-green-600">
-                          {subscription.status}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Next billing date
-                        </p>
-                        <p className="text-sm font-semibold">
-                          {subscription.current_period_end
-                            ? new Date(subscription.current_period_end).toLocaleDateString()
-                            : 'N/A'
-                          }
-                        </p>
-                      </div>
                     </div>
                   </>
                 ) : (
@@ -299,41 +368,6 @@ export default function SettingsPage() {
                   <div>
                     <label className="text-sm font-medium mb-3 block">Theme</label>
                     <ThemeSelector />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {activeSection === 'security' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Security</CardTitle>
-                <CardDescription>
-                  Manage your password and account security
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Password</p>
-                    <p className="text-xs text-muted-foreground">
-                      Last changed 30 days ago
-                    </p>
-                  </div>
-                  <Button variant="outline" size="sm">Change Password</Button>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Two-Factor Authentication</p>
-                    <p className="text-xs text-muted-foreground">
-                      Add an extra layer of security
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline" className="text-xs">Disabled</Badge>
-                    <Button variant="outline" size="sm">Enable</Button>
                   </div>
                 </div>
               </CardContent>
