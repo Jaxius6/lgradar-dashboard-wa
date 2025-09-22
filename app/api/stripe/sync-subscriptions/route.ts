@@ -3,6 +3,9 @@ import { stripe } from '@/lib/stripe';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
+// Force dynamic rendering since we use cookies()
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     if (!stripe) {

@@ -18,30 +18,33 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [supabase, setSupabase] = useState<any>(null);
 
   useEffect(() => {
-    // Initialize Supabase client only on the client side
+    // TEMPORARILY BYPASSED: Provide mock user data for demonstration
+    const mockUser: User = {
+      id: 'demo-user-id',
+      aud: 'authenticated',
+      role: 'authenticated',
+      email: 'demo@lgsharp.com',
+      email_confirmed_at: new Date().toISOString(),
+      phone: '',
+      confirmed_at: new Date().toISOString(),
+      last_sign_in_at: new Date().toISOString(),
+      app_metadata: {},
+      user_metadata: {
+        full_name: 'Demo User'
+      },
+      identities: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    // Set mock user and mark loading as complete
+    setUser(mockUser);
+    setLoading(false);
+
+    // Initialize Supabase client for potential future use
     if (typeof window !== 'undefined') {
       const client = createClientComponentClient();
       setSupabase(client);
-      
-      const getUser = async () => {
-        if (!client) return;
-        const { data: { user } } = await client.auth.getUser();
-        setUser(user);
-        setLoading(false);
-      };
-
-      getUser();
-
-      const { data: { subscription } } = client.auth.onAuthStateChange(
-        (event: string, session: any) => {
-          setUser(session?.user ?? null);
-          setLoading(false);
-        }
-      );
-
-      return () => subscription.unsubscribe();
-    } else {
-      setLoading(false);
     }
   }, []);
 

@@ -30,76 +30,18 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const supabase = createClientComponentClient();
 
   const fetchSubscription = async () => {
-    if (!user) {
-      setSubscription(null);
-      setLoading(false);
-      return;
-    }
+    // TEMPORARILY BYPASSED: Provide mock subscription data for demonstration
+    const mockSubscription: Subscription = {
+      id: 'demo-subscription-id',
+      plan: 'yearly',
+      status: 'active',
+      current_period_start: new Date().toISOString(),
+      current_period_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() // 1 year from now
+    };
 
-    try {
-      setLoading(true);
-      
-      // Check for temporary access (user just completed payment)
-      const tempAccess = sessionStorage.getItem('stripe_payment_success');
-      if (tempAccess) {
-        const accessData = JSON.parse(tempAccess);
-        const accessTime = new Date(accessData.timestamp);
-        const now = new Date();
-        const timeDiff = now.getTime() - accessTime.getTime();
-        
-        // Grant temporary access for 10 minutes after payment
-        if (timeDiff < 10 * 60 * 1000) {
-          setHasTemporaryAccess(true);
-          setSubscription({
-            id: 'temp-access',
-            plan: accessData.plan || 'monthly',
-            status: 'active',
-            current_period_start: new Date().toISOString(),
-            current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-          });
-          setLoading(false);
-          return;
-        } else {
-          // Remove expired temporary access
-          sessionStorage.removeItem('stripe_payment_success');
-          setHasTemporaryAccess(false);
-        }
-      }
-      
-      // Query the subscriptions table
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('id, plan, status, current_period_start, current_period_end')
-        .eq('user_id', user.id)
-        .in('status', ['active', 'trialing', 'past_due'])
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No rows returned - user has no active subscription
-          setSubscription(null);
-        } else {
-          console.error('Error fetching subscription:', error);
-          setSubscription(null);
-        }
-      } else if (data) {
-        setSubscription(data);
-        // Clear temporary access if real subscription found
-        if (hasTemporaryAccess) {
-          sessionStorage.removeItem('stripe_payment_success');
-          setHasTemporaryAccess(false);
-        }
-      } else {
-        setSubscription(null);
-      }
-    } catch (error) {
-      console.error('Error fetching subscription:', error);
-      setSubscription(null);
-    } finally {
-      setLoading(false);
-    }
+    // Set mock subscription and mark loading as complete
+    setSubscription(mockSubscription);
+    setLoading(false);
   };
 
   useEffect(() => {
