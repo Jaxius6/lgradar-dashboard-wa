@@ -61,8 +61,8 @@ export async function getGazettes(filters: GazetteFilters = {}): Promise<{
       query = query.range(filters.offset, filters.offset + (filters.limit || 10) - 1);
     }
 
-    // Order by date (most recent first)
-    query = query.order('date', { ascending: false, nullsLast: true });
+    // Order by published date (most recent first)
+    query = query.order('pubdate', { ascending: false, nullsLast: true });
 
     const { data, error, count } = await query;
 
@@ -175,5 +175,51 @@ export async function getGazetteById(id: number): Promise<{
       data: null,
       error: 'An unexpected error occurred'
     };
+  }
+}
+
+export async function updateGazetteFlag(id: number, is_flagged: boolean) {
+  try {
+    const supabase = createServerComponentClient();
+    
+    const { data, error } = await supabase
+      .from('gazettes')
+      .update({ is_flagged })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating gazette flag:', error);
+      return { data: null, error: error.message };
+    }
+
+    return { data: data as Gazette, error: null };
+  } catch (error) {
+    console.error('Error in updateGazetteFlag:', error);
+    return { data: null, error: 'Failed to update flag status' };
+  }
+}
+
+export async function updateGazetteReview(id: number, is_reviewed: boolean) {
+  try {
+    const supabase = createServerComponentClient();
+    
+    const { data, error } = await supabase
+      .from('gazettes')
+      .update({ is_reviewed })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating gazette review:', error);
+      return { data: null, error: error.message };
+    }
+
+    return { data: data as Gazette, error: null };
+  } catch (error) {
+    console.error('Error in updateGazetteReview:', error);
+    return { data: null, error: 'Failed to update review status' };
   }
 }

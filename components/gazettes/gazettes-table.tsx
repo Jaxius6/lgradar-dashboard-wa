@@ -12,11 +12,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate, formatCountdown, getRiskBadgeVariant } from '@/lib/utils';
-import { Eye, ExternalLinkIcon, Clock, AlertCircle, Flag, Check } from 'lucide-react';
+import { Archive, ExternalLinkIcon, Clock, AlertCircle, Flag } from 'lucide-react';
 import { GazetteDetailDrawer } from './gazette-detail-drawer';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { Gazette } from '@/lib/dbSchema';
-import { getGazettes } from '@/lib/actions/gazettes';
+import { getGazettes, updateGazetteFlag, updateGazetteReview } from '@/lib/actions/gazettes';
 import { calculateRiskRating, isGazetteRelevant, getDaysUntilNextSitting } from '@/lib/gazette-utils';
 
 interface GazetteTableProps {
@@ -96,7 +96,18 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
   const handleExternalLink = (gazette: Gazette, e: React.MouseEvent) => {
     e.stopPropagation();
     if (gazette.link) {
-      window.open(gazette.link, '_blank');
+      try {
+        // Ensure URL has protocol
+        let url = gazette.link;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url;
+        }
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } catch (error) {
+        console.error('Failed to open link:', error);
+        // Fallback: try opening the original link
+        window.open(gazette.link, '_blank', 'noopener,noreferrer');
+      }
     }
   };
 
@@ -208,7 +219,7 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                   onClick={() => handleRowClick(gazette)}
                 >
                   <TableCell className="font-medium">
-                    {gazette.pubdate ? formatDate(gazette.pubdate, 'MMM dd') : 'N/A'}
+                    {gazette.pubdate ? formatDate(gazette.pubdate, 'dd/MM/yy') : 'N/A'}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2 max-w-md">
@@ -231,7 +242,7 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">
-                    {gazette.date ? formatDate(gazette.date, 'MMM dd') : 'N/A'}
+                    {gazette.date ? formatDate(gazette.date, 'dd/MM/yy') : 'N/A'}
                   </TableCell>
                   <TableCell>
                     {gazette.next_sit ? (
@@ -245,7 +256,7 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                               'Passed'
                             )
                           ) : (
-                            formatDate(gazette.next_sit, 'MMM dd')
+                            formatDate(gazette.next_sit, 'dd/MM/yy')
                           )}
                         </span>
                       </div>
@@ -255,16 +266,6 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-0.5">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7"
-                        onClick={(e) => handleViewDetails(gazette, e)}
-                        title="View details"
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                        <span className="sr-only">View details</span>
-                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -280,15 +281,24 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                         variant="ghost"
                         size="icon"
                         className={`h-7 w-7 ${gazette.is_flagged ? 'text-red-500' : ''}`}
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          // Toggle flag state optimistically
                           const newFlaggedState = !gazette.is_flagged;
+                          
+                          // Update local state optimistically
                           setGazettes(prev => prev.map(g =>
                             g.id === gazette.id ? { ...g, is_flagged: newFlaggedState } : g
                           ));
-                          // TODO: Call API to update database
-                          console.log(`Flagging gazette ${gazette.id}: ${newFlaggedState}`);
+                          
+                          // Call API to update database
+                          const result = await updateGazetteFlag(gazette.id, newFlaggedState);
+                          if (result.error) {
+                            // Revert on error
+                            setGazettes(prev => prev.map(g =>
+                              g.id === gazette.id ? { ...g, is_flagged: !newFlaggedState } : g
+                            ));
+                            console.error('Failed to update flag:', result.error);
+                          }
                         }}
                         title="Flag for attention"
                       >
@@ -298,21 +308,30 @@ export function GazettesTable({ searchQuery }: GazetteTableProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={`h-7 w-7 ${gazette.is_reviewed ? 'text-green-500' : ''}`}
-                        onClick={(e) => {
+                        className={`h-7 w-7 ${gazette.is_reviewed ? 'text-blue-500' : ''}`}
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          // Toggle review state optimistically
-                          const newReviewedState = !gazette.is_reviewed;
+                          const newArchivedState = !gazette.is_reviewed;
+                          
+                          // Update local state optimistically
                           setGazettes(prev => prev.map(g =>
-                            g.id === gazette.id ? { ...g, is_reviewed: newReviewedState } : g
+                            g.id === gazette.id ? { ...g, is_reviewed: newArchivedState } : g
                           ));
-                          // TODO: Call API to update database
-                          console.log(`Reviewing gazette ${gazette.id}: ${newReviewedState}`);
+                          
+                          // Call API to update database
+                          const result = await updateGazetteReview(gazette.id, newArchivedState);
+                          if (result.error) {
+                            // Revert on error
+                            setGazettes(prev => prev.map(g =>
+                              g.id === gazette.id ? { ...g, is_reviewed: !newArchivedState } : g
+                            ));
+                            console.error('Failed to update archive status:', result.error);
+                          }
                         }}
-                        title="Mark as reviewed"
+                        title="Archive"
                       >
-                        <Check className="h-3.5 w-3.5" />
-                        <span className="sr-only">Mark as reviewed</span>
+                        <Archive className="h-3.5 w-3.5" />
+                        <span className="sr-only">Archive</span>
                       </Button>
                     </div>
                   </TableCell>

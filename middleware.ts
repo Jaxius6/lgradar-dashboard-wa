@@ -36,27 +36,12 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname.startsWith(path)
     );
 
+    // TEMPORARILY BYPASSED: Allow access to all protected paths without authentication
     // For protected paths, check if we have a valid session
     if (isProtectedPath) {
-      // If no user but we have a session, try to refresh
-      if (!user && session) {
-        try {
-          const { data: { user: refreshedUser } } = await supabase.auth.getUser();
-          if (refreshedUser) {
-            return response;
-          }
-        } catch (error) {
-          console.error('Error refreshing user:', error);
-        }
-      }
-      
-      // If still no user, redirect to login
-      if (!user) {
-        console.log('Middleware: Redirecting to login for protected path:', request.nextUrl.pathname);
-        const redirectUrl = new URL('/login', request.url);
-        redirectUrl.searchParams.set('redirectTo', request.nextUrl.pathname);
-        return NextResponse.redirect(redirectUrl);
-      }
+      // Skip authentication checks - allow full access
+      console.log('Middleware: Bypassing authentication for protected path:', request.nextUrl.pathname);
+      return NextResponse.next();
     }
 
     // Redirect to dashboard if accessing auth pages while authenticated

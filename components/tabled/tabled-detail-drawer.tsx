@@ -36,7 +36,18 @@ export function TabledDetailDrawer({ item, open, onOpenChange }: TabledDetailDra
     // Use 'url' column if it exists, otherwise fall back to 'link'
     const linkUrl = item.url || item.link;
     if (linkUrl) {
-      window.open(linkUrl, '_blank');
+      try {
+        // Ensure URL has protocol
+        let url = linkUrl;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url;
+        }
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } catch (error) {
+        console.error('Failed to open link:', error);
+        // Fallback: try opening the original link
+        window.open(linkUrl, '_blank', 'noopener,noreferrer');
+      }
     }
   };
 

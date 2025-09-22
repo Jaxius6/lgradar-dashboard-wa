@@ -221,7 +221,22 @@ export function GazetteDetailDrawer({ gazette, open, onOpenChange }: GazetteDeta
           <div className="flex items-center space-x-3 pt-4 border-t">
             <Button
               className="flex-1"
-              onClick={() => gazette.link && window.open(gazette.link, '_blank')}
+              onClick={() => {
+                if (gazette.link) {
+                  try {
+                    // Ensure URL has protocol
+                    let url = gazette.link;
+                    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                      url = 'https://' + url;
+                    }
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                  } catch (error) {
+                    console.error('Failed to open link:', error);
+                    // Fallback: try opening the original link
+                    window.open(gazette.link, '_blank', 'noopener,noreferrer');
+                  }
+                }
+              }}
               disabled={!gazette.link}
             >
               <ExternalLink className="h-4 w-4 mr-2" />

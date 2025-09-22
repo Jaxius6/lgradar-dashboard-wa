@@ -12,11 +12,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate } from '@/lib/utils';
-import { Eye, ExternalLinkIcon, AlertCircle, Flag, Check } from 'lucide-react';
+import { Archive, ExternalLinkIcon, AlertCircle, Flag } from 'lucide-react';
 import { TabledDetailDrawer } from './tabled-detail-drawer';
 import { SortableHeader } from '@/components/ui/sortable-header';
 import { Tabled } from '@/lib/dbSchema';
-import { getTabledItems } from '@/lib/actions/tabled';
+import { getTabledItems, updateTabledItemFlag, updateTabledItemReview } from '@/lib/actions/tabled';
 
 // Type color mapping
 const getTypeColor = (type: string) => {
@@ -116,36 +116,59 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
     // Use 'url' column if it exists, otherwise fall back to 'link'
     const linkUrl = item.url || item.link;
     if (linkUrl) {
-      window.open(linkUrl, '_blank');
+      try {
+        // Ensure URL has protocol
+        let url = linkUrl;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url;
+        }
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } catch (error) {
+        console.error('Failed to open link:', error);
+        // Fallback: try opening the original link
+        window.open(linkUrl, '_blank', 'noopener,noreferrer');
+      }
     }
   };
 
   const handleFlag = async (item: Tabled, e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Implement flag functionality
     const newFlaggedState = !item.is_flagged;
     
     // Update local state optimistically
-    setTabledItems(prev => prev.map(t => 
+    setTabledItems(prev => prev.map(t =>
       t.id === item.id ? { ...t, is_flagged: newFlaggedState } : t
     ));
     
-    // TODO: Call API to update database
-    console.log(`Flagging item ${item.id}: ${newFlaggedState}`);
+    // Call API to update database
+    const result = await updateTabledItemFlag(item.id, newFlaggedState);
+    if (result.error) {
+      // Revert on error
+      setTabledItems(prev => prev.map(t =>
+        t.id === item.id ? { ...t, is_flagged: !newFlaggedState } : t
+      ));
+      console.error('Failed to update flag:', result.error);
+    }
   };
 
-  const handleReview = async (item: Tabled, e: React.MouseEvent) => {
+  const handleArchive = async (item: Tabled, e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Implement review functionality
-    const newReviewedState = !item.is_reviewed;
+    const newArchivedState = !item.is_reviewed;
     
     // Update local state optimistically
-    setTabledItems(prev => prev.map(t => 
-      t.id === item.id ? { ...t, is_reviewed: newReviewedState } : t
+    setTabledItems(prev => prev.map(t =>
+      t.id === item.id ? { ...t, is_reviewed: newArchivedState } : t
     ));
     
-    // TODO: Call API to update database
-    console.log(`Reviewing item ${item.id}: ${newReviewedState}`);
+    // Call API to update database
+    const result = await updateTabledItemReview(item.id, newArchivedState);
+    if (result.error) {
+      // Revert on error
+      setTabledItems(prev => prev.map(t =>
+        t.id === item.id ? { ...t, is_reviewed: !newArchivedState } : t
+      ));
+      console.error('Failed to update archive status:', result.error);
+    }
   };
 
   if (loading) {
@@ -235,7 +258,7 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
                   onClick={() => handleRowClick(item)}
                 >
                   <TableCell className="font-medium text-xs py-2">
-                    {item.date ? formatDate(item.date, 'MMM dd') : 'N/A'}
+                    {item.date ? formatDate(item.date, 'dd/MM/yy') : 'N/A'}
                   </TableCell>
                   <TableCell className="py-2">
                     <span className={`font-medium text-xs ${getTypeColor(item.type || 'Unknown')}`}>
@@ -254,16 +277,6 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
                   </TableCell>
                   <TableCell className="py-2">
                     <div className="flex items-center gap-0.5">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={(e) => handleViewDetails(item, e)}
-                        title="View details"
-                      >
-                        <Eye className="h-3 w-3" />
-                        <span className="sr-only">View details</span>
-                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -288,12 +301,12 @@ export function TabledTable({ searchQuery, selectedTypes }: TabledTableProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className={`h-6 w-6 ${item.is_reviewed ? 'text-green-500' : ''}`}
-                        onClick={(e) => handleReview(item, e)}
-                        title="Mark as reviewed"
+                        className={`h-6 w-6 ${item.is_reviewed ? 'text-blue-500' : ''}`}
+                        onClick={(e) => handleArchive(item, e)}
+                        title="Archive"
                       >
-                        <Check className="h-3 w-3" />
-                        <span className="sr-only">Mark as reviewed</span>
+                        <Archive className="h-3 w-3" />
+                        <span className="sr-only">Archive</span>
                       </Button>
                     </div>
                   </TableCell>
